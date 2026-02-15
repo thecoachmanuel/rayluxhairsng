@@ -1,69 +1,57 @@
-# QuickCart - A simple eCommerce website
+# RayLux Hairs Storefront
 
-QuickCart is an open-source **Next.js eCommerce frontend** project.  
-It provides a modern, fast and customizable shopping UI.  
-This repo is **frontend only** – contributors can improve the design, add new pages, animations and more.
+RayLux Hairs is a Next.js storefront for selling premium human hair bundles, wigs, and accessories. It is optimized for fast loading, clean UX, and mobile responsiveness.
 
----
+## Tech Stack
 
-## Features
-
--   Built with **Next.js + Tailwind CSS**
--   Responsive design
--   Reusable components
--   Customizable layouts and colors
--   Open for contributions (UI/UX, animations, themes, layouts etc.)
-
----
+- Next.js (App Router)
+- React
+- Tailwind CSS
+- Supabase (auth, database, and backend)
 
 ## Getting Started
 
-1. Clone the repo
+Install dependencies:
 
-    ```bash
-    git clone https://github.com/GreatStackDev/QuickCart.git
-    cd QuickCart
-    ```
+```bash
+npm install
+```
 
-2. Install dependencies
+Run the development server:
 
-    ```bash
-    npm install
-    ```
+```bash
+npm run dev
+```
 
-3. Run locally
+Then open http://localhost:3000 in your browser.
 
-    ```bash
-    npm run dev
-    ```
+## Environment Variables
 
----
+Create a .env file in the project root and set:
 
-## Contributing
+```env
+NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+NEXT_PUBLIC_CURRENCY=₦
+```
 
-We welcome all kinds of contributions! You can:
+Do not commit secrets or private keys to version control.
 
-- Create new pages
-- Improve layouts
-- Add animations and transitions
-- Enhance responsiveness
-- Refactor components
-- Suggest new UI/UX ideas
-- Add themes or color variations
-- Introduce accessibility improvements
-- Add filtering/search features
-- Improve documentation
+## Supabase
 
-Check out [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Supabase is used for:
 
----
+- Products (live catalogue)
+- Orders and order items
+- Coupons and discounts
+- Storefront configuration (banner, hero slides, branding, shipping)
+- Authentication
 
-## License
+Ensure the Supabase tables are created to match the expected schema in the codebase.
 
-This project is licensed under the **MIT License**.
+## Scripts
 
----
+- `npm run dev` – start development server
+- `npm run build` – create production build
+- `npm start` – run production server
 
-## 🌟 Contributors
-
-Thanks to everyone who contributes to **QuickCart**!
