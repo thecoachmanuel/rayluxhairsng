@@ -1,12 +1,12 @@
-"use client"
-import { useMemo, useState } from "react";
+"use client";
+import { Suspense, useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAppContext } from "@/context/AppContext";
 import { useSearchParams } from "next/navigation";
 
-const AllProducts = () => {
+const AllProductsContent = () => {
   const { products } = useAppContext();
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
@@ -85,6 +85,24 @@ const AllProducts = () => {
       </div>
       <Footer />
     </>
+  );
+};
+
+const AllProducts = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[60vh] flex flex-col">
+          <Navbar />
+          <div className="flex-1 flex items-center justify-center px-6">
+            <p className="text-sm text-gray-600">Loading products...</p>
+          </div>
+          <Footer />
+        </div>
+      }
+    >
+      <AllProductsContent />
+    </Suspense>
   );
 };
 

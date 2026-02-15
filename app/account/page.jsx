@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAppContext } from "@/context/AppContext";
 
-const AccountPage = () => {
+const AccountPageContent = () => {
   const {
     authUser,
     authLoading,
@@ -192,6 +192,24 @@ const AccountPage = () => {
       </div>
       <Footer />
     </>
+  );
+};
+
+const AccountPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Navbar />
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <p className="text-sm text-gray-600">Loading account...</p>
+          </div>
+          <Footer />
+        </>
+      }
+    >
+      <AccountPageContent />
+    </Suspense>
   );
 };
 
