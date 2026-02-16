@@ -11,12 +11,14 @@ export const useAppContext = () => {
 };
 
 export const AppContextProvider = (props) => {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY;
+
+	const currency = "₦";
   const router = useRouter();
+  const ADMIN_EMAIL = "rayluxhairsng@gmail.com";
 
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(false);
-  const [isSeller, setIsSeller] = useState(true);
+  const [isSeller, setIsSeller] = useState(false);
   const [cartItems, setCartItems] = useState({});
   const [authUser, setAuthUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -41,12 +43,14 @@ export const AppContextProvider = (props) => {
     freeShippingThreshold: 0,
   });
   const [coupons, setCoupons] = useState([]);
+  const [membership, setMembership] = useState(null);
   const [bannerContent, setBannerContent] = useState({
     title: "Level Up Your Look With RayLux Hairs",
     description: "From sleek straight to deep wave—premium human hair for every style.",
     ctaLabel: "Shop bundle deals",
     imageUrl: "",
   });
+  const [wishlistIds, setWishlistIds] = useState([]);
 
   const fetchProductData = async () => {
     if (supabase) {
@@ -106,6 +110,20 @@ export const AppContextProvider = (props) => {
       }
     } catch (error) {
     }
+  };
+
+  const loadWishlist = () => {
+    try {
+      const stored = localStorage.getItem("raylux_wishlist");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setWishlistIds(parsed);
+          return;
+        }
+      }
+    } catch (error) {}
+    setWishlistIds([]);
   };
 
   const updateFeaturedProducts = (ids) => {
@@ -594,6 +612,52 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  const loadMembership = () => {
+    if (!supabase || !authUser) {
+      setMembership(null);
+      return;
+    }
+    supabase
+      .from("memberships")
+      .select("*")
+      .eq("user_id", authUser.id)
+      .limit(1)
+      .then((result) => {
+        if (!result.error && Array.isArray(result.data) && result.data[0]) {
+          setMembership(result.data[0]);
+        } else {
+          setMembership(null);
+        }
+      })
+      .catch(() => {
+        setMembership(null);
+      });
+  };
+
+  const joinMembership = async () => {
+    if (!supabase || !authUser) {
+      return {
+        data: null,
+        error: new Error("Sign in to join membership."),
+      };
+    }
+    const payload = {
+      user_id: authUser.id,
+      email: authUser.email,
+      tier: "VIP",
+      is_active: true,
+    };
+    const { data, error } = await supabase
+      .from("memberships")
+      .upsert(payload)
+      .select("*")
+      .single();
+    if (!error && data) {
+      setMembership(data);
+    }
+    return { data, error };
+  };
+
   const signIn = async (email, password) => {
     if (!supabase) {
       return {
@@ -607,6 +671,7 @@ export const AppContextProvider = (props) => {
     });
     if (!result.error && result.data && result.data.user) {
       setAuthUser(result.data.user);
+      setIsSeller(result.data.user.email === ADMIN_EMAIL);
     }
     return result;
   };
@@ -624,6 +689,7 @@ export const AppContextProvider = (props) => {
     });
     if (!result.error && result.data && result.data.user) {
       setAuthUser(result.data.user);
+      setIsSeller(result.data.user.email === ADMIN_EMAIL);
     }
     return result;
   };
@@ -631,10 +697,12 @@ export const AppContextProvider = (props) => {
   const signOut = async () => {
     if (!supabase) {
       setAuthUser(null);
+      setIsSeller(false);
       return;
     }
     await supabase.auth.signOut();
     setAuthUser(null);
+    setIsSeller(false);
   };
 
   const updateBannerContent = (content) => {
@@ -663,6 +731,19 @@ export const AppContextProvider = (props) => {
     } catch (error) {
     }
   };
+
+  const toggleWishlistItem = (id) => {
+    setWishlistIds((prev) => {
+      const exists = prev.includes(id);
+      const next = exists ? prev.filter((itemId) => itemId !== id) : [...prev, id];
+      try {
+        localStorage.setItem("raylux_wishlist", JSON.stringify(next));
+      } catch (error) {}
+      return next;
+    });
+  };
+
+  const isWishlisted = (id) => wishlistIds.includes(id);
 
   const persistProducts = (updatedProducts) => {
     setProducts(updatedProducts);
@@ -768,6 +849,32 @@ export const AppContextProvider = (props) => {
     return Math.floor(totalAmount * 100) / 100;
   };
 
+  const getCartItemCount = () => {
+    let totalCount = 0;
+    for (const items in cartItems) {
+      if (cartItems[items] > 0) {
+        totalCount += cartItems[items];
+      }
+    }
+    return totalCount;
+  };
+
+	const formatCurrency = (amount) => {
+		if (!amount || isNaN(amount)) {
+			return `${currency}0`;
+		}
+		try {
+			return new Intl.NumberFormat("en-NG", {
+				style: "currency",
+				currency: "NGN",
+				minimumFractionDigits: 0,
+				maximumFractionDigits: 0,
+			}).format(amount);
+		} catch (_error) {
+			return `${currency}${amount}`;
+		}
+	};
+
   useEffect(() => {
     fetchProductData();
     fetchUserData();
@@ -778,6 +885,7 @@ export const AppContextProvider = (props) => {
     loadNewsletterEmails();
     loadShippingSettings();
     loadCoupons();
+    loadWishlist();
     if (!supabase) {
       setAuthLoading(false);
       return;
@@ -791,8 +899,10 @@ export const AppContextProvider = (props) => {
         }
         if (!error && data && data.user) {
           setAuthUser(data.user);
+          setIsSeller(data.user.email === ADMIN_EMAIL);
         } else {
           setAuthUser(null);
+          setIsSeller(false);
         }
         setAuthLoading(false);
       })
@@ -801,6 +911,7 @@ export const AppContextProvider = (props) => {
           return;
         }
         setAuthUser(null);
+        setIsSeller(false);
         setAuthLoading(false);
       });
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -809,8 +920,10 @@ export const AppContextProvider = (props) => {
       }
       if (session && session.user) {
         setAuthUser(session.user);
+        setIsSeller(session.user.email === ADMIN_EMAIL);
       } else {
         setAuthUser(null);
+        setIsSeller(false);
       }
     });
     return () => {
@@ -820,6 +933,14 @@ export const AppContextProvider = (props) => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (authUser) {
+      loadMembership();
+    } else {
+      setMembership(null);
+    }
+  }, [authUser]);
 
   const value = {
     currency,
@@ -841,6 +962,8 @@ export const AppContextProvider = (props) => {
     updateCartQuantity,
     getCartCount,
     getCartAmount,
+    getCartItemCount,
+    formatCurrency,
     featuredProductIds,
     updateFeaturedProducts,
     bannerContent,
@@ -857,6 +980,11 @@ export const AppContextProvider = (props) => {
     addCoupon,
     updateCoupon,
     deleteCoupon,
+    membership,
+    joinMembership,
+    wishlistIds,
+    toggleWishlistItem,
+    isWishlisted,
   };
 
   return (

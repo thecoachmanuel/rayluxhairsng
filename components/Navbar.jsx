@@ -6,7 +6,7 @@ import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 
 const Navbar = () => {
-  const { isSeller, router, branding, authUser } = useAppContext();
+  const { isSeller, router, branding, authUser, getCartItemCount } = useAppContext();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
@@ -35,16 +35,16 @@ const Navbar = () => {
         Raylux Hairs
       </button>
       <div className="flex items-center gap-4 lg:gap-8 max-md:hidden">
-        <Link href="/" className="hover:text-gray-900 transition">
-          Home
-        </Link>
         <Link href="/all-products" className="hover:text-gray-900 transition">
           Shop
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/wishlist" className="hover:text-gray-900 transition">
+          Wishlist
+        </Link>
+        <Link href="/about" className="hover:text-gray-900 transition">
           About Us
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/contact" className="hover:text-gray-900 transition">
           Contact
         </Link>
 
@@ -86,6 +86,19 @@ const Navbar = () => {
           />
         </form>
         <button
+          type="button"
+          onClick={() => router.push("/cart")}
+          className="relative flex items-center justify-center cursor-pointer"
+          aria-label="View cart"
+        >
+          <Image src={assets.cart_icon} alt="cart icon" className="w-5 h-5" />
+          {getCartItemCount() > 0 && (
+            <span className="absolute -top-1 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-orange-600 text-[10px] font-semibold text-white flex items-center justify-center">
+              {getCartItemCount()}
+            </span>
+          )}
+        </button>
+        <button
           onClick={() => router.push("/account")}
           className="flex items-center gap-2 hover:text-gray-900 transition cursor-pointer"
         >
@@ -103,6 +116,19 @@ const Navbar = () => {
             Admin Dashboard
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => router.push("/cart")}
+          className="relative flex items-center justify-center cursor-pointer"
+          aria-label="View cart"
+        >
+          <Image src={assets.cart_icon} alt="cart icon" className="w-5 h-5" />
+          {getCartItemCount() > 0 && (
+            <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-orange-600 text-[10px] font-semibold text-white flex items-center justify-center">
+              {getCartItemCount()}
+            </span>
+          )}
+        </button>
         <button
           onClick={() => router.push("/account")}
           className="flex items-center gap-2 hover:text-gray-900 transition cursor-pointer"

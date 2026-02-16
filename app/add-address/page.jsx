@@ -3,9 +3,13 @@ import { assets } from "@/assets/assets";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppContext } from "@/context/AppContext";
+import { supabase } from "@/supabaseClient";
 
 const AddAddress = () => {
+
+    const { authUser, authLoading, router } = useAppContext();
 
     const [address, setAddress] = useState({
         fullName: '',
@@ -14,12 +18,50 @@ const AddAddress = () => {
         area: '',
         city: '',
         state: '',
-    })
+    });
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (!authLoading && !authUser) {
+            router.push("/account?redirect=/add-address");
+        }
+    }, [authLoading, authUser, router]);
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
-
-    }
+        setError("");
+        if (!authUser) {
+            setError("Sign in to save an address.");
+            return;
+        }
+        if (!supabase) {
+            setError("Address book is currently unavailable. Try again later.");
+            return;
+        }
+        if (!address.fullName.trim() || !address.phoneNumber.trim() || !address.area.trim() || !address.city.trim() || !address.state.trim()) {
+            setError("Fill in all required fields.");
+            return;
+        }
+        setSaving(true);
+        const payload = {
+            user_id: authUser.id,
+            full_name: address.fullName.trim(),
+            phone_number: address.phoneNumber.trim(),
+            pincode: address.pincode.trim(),
+            area: address.area.trim(),
+            city: address.city.trim(),
+            state: address.state.trim(),
+        };
+        const { error: insertError } = await supabase.from("addresses").insert([payload]);
+        if (insertError) {
+            setError("Unable to save address. Please try again.");
+            setSaving(false);
+            return;
+        }
+        setSaving(false);
+        router.push("/checkout");
+    };
 
     return (
         <>
@@ -76,8 +118,15 @@ const AddAddress = () => {
                             />
                         </div>
                     </div>
-                    <button type="submit" className="max-w-sm w-full mt-6 bg-orange-600 text-white py-3 hover:bg-orange-700 uppercase">
-                        Save address
+                    {error && (
+                        <p className="text-sm text-red-600 mt-3 max-w-sm">{error}</p>
+                    )}
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="max-w-sm w-full mt-6 bg-orange-600 text-white py-3 hover:bg-orange-700 uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        {saving ? "Saving..." : "Save address"}
                     </button>
                 </form>
                 <Image

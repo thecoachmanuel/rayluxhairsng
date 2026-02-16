@@ -1,17 +1,24 @@
 import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useMemo, useState } from "react";
+import Script from "next/script";
+import { supabase } from "@/supabaseClient";
 
 const OrderSummary = () => {
 
-  const {
-    currency,
-    router,
-    getCartCount,
-    getCartAmount,
-    shippingSettings,
-    coupons,
-  } = useAppContext();
+	const {
+		currency,
+		router,
+		authUser,
+		products,
+		cartItems,
+		setCartItems,
+		getCartCount,
+		getCartAmount,
+		shippingSettings,
+		coupons,
+		formatCurrency,
+	} = useAppContext();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -20,22 +27,137 @@ const OrderSummary = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
+  const [isPaying, setIsPaying] = useState(false);
 
-  const fetchUserAddresses = async () => {
-    setUserAddresses(addressDummyData);
-  }
+	const fetchUserAddresses = async () => {
+		if (supabase && authUser) {
+			const { data, error } = await supabase
+				.from("addresses")
+				.select("*")
+				.eq("user_id", authUser.id)
+				.order("created_at", { ascending: false });
+			if (!error && Array.isArray(data)) {
+				const mapped = data.map((row) => ({
+					id: row.id,
+					fullName: row.full_name,
+					phoneNumber: row.phone_number,
+					pincode: row.pincode,
+					area: row.area,
+					city: row.city,
+					state: row.state,
+				}));
+				setUserAddresses(mapped);
+				return;
+			}
+		}
+		setUserAddresses(addressDummyData);
+	};
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
     setIsDropdownOpen(false);
   };
 
-  const createOrder = async () => {
+	const createOrder = async (paystackReference) => {
+		if (!supabase) {
+			setCouponMessage(
+				"Payment succeeded, but the order system is offline. Please contact support with your payment reference."
+			);
+			return Promise.reject(new Error("Supabase not configured"));
+		}
+		if (!authUser) {
+			setCouponMessage(
+				"Payment succeeded, but we could not link this order to your account. Please sign in and contact support with your payment reference."
+			);
+			return Promise.reject(new Error("User not authenticated"));
+		}
+		if (!selectedAddress) {
+			setCouponMessage("Select a delivery address before paying.");
+			return Promise.reject(new Error("No address selected"));
+		}
+		const cartProductIds = Object.keys(cartItems || {});
+		if (cartProductIds.length === 0) {
+			setCouponMessage("Your cart is empty.");
+			return Promise.reject(new Error("Cart is empty"));
+		}
+		let addressId = selectedAddress.id;
+		if (!addressId) {
+			const addressPayload = {
+				user_id: authUser.id,
+				full_name: selectedAddress.fullName,
+				phone_number: selectedAddress.phoneNumber,
+				pincode: selectedAddress.pincode,
+				area: selectedAddress.area,
+				city: selectedAddress.city,
+				state: selectedAddress.state,
+			};
+			const { data: addressRow, error: addressError } = await supabase
+				.from("addresses")
+				.insert([addressPayload])
+				.select("*")
+				.single();
+			if (addressError || !addressRow) {
+				setCouponMessage(
+					"Payment succeeded, but we could not save your address. Please contact support with your payment reference."
+				);
+				return Promise.reject(addressError || new Error("Address insert failed"));
+			}
+			addressId = addressRow.id;
+		}
+		const orderPayload = {
+			userId: authUser.id,
+			amount: total,
+			status: "Processing",
+			payment_method: "Paystack",
+			address_id: addressId,
+		};
+		const { data: orderRow, error: orderError } = await supabase
+			.from("orders")
+			.insert([orderPayload])
+			.select("*")
+			.single();
+		if (orderError || !orderRow) {
+			setCouponMessage(
+				"Payment succeeded, but we could not save your order. Please contact support with your payment reference."
+			);
+			return Promise.reject(orderError || new Error("Order insert failed"));
+		}
+		const itemsPayload = [];
+		cartProductIds.forEach((productId) => {
+			const quantity = cartItems[productId];
+			if (!quantity || quantity <= 0) {
+				return;
+			}
+			const product = products.find(
+				(item) => item._id === productId || String(item.id) === String(productId)
+			);
+			if (!product) {
+				return;
+			}
+			const productRowId = product.id || product._id;
+			itemsPayload.push({
+				order_id: orderRow.id,
+				product_id: productRowId,
+				quantity,
+			});
+		});
+		if (itemsPayload.length > 0) {
+			const { error: itemsError } = await supabase
+				.from("order_items")
+				.insert(itemsPayload);
+			if (itemsError) {
+				setCouponMessage(
+					"Payment succeeded, but some items were not recorded. Please contact support with your payment reference."
+				);
+				return Promise.reject(itemsError);
+			}
+		}
+		setCartItems({});
+		return orderRow;
+	};
 
-  }
-
-  const cartCount = getCartCount();
-  const cartAmount = getCartAmount();
+	const cartCount = getCartCount();
+	const cartAmount = getCartAmount();
 
   const shippingFee = useMemo(() => {
     if (cartAmount <= 0) return 0;
@@ -48,7 +170,7 @@ const OrderSummary = () => {
     return base + perItem * cartCount;
   }, [cartAmount, cartCount, shippingSettings]);
 
-  const handleApplyCoupon = () => {
+	const handleApplyCoupon = () => {
     const code = promoCode.trim().toUpperCase();
     if (!code) {
       setCouponMessage("Enter a coupon code.");
@@ -69,9 +191,9 @@ const OrderSummary = () => {
     if (coupon.minAmount && cartAmount < coupon.minAmount) {
       setAppliedCoupon(null);
       setDiscountAmount(0);
-      setCouponMessage(
-        `Minimum order amount for this coupon is ${currency}${coupon.minAmount}.`
-      );
+			setCouponMessage(
+				`Minimum order amount for this coupon is ${formatCurrency(coupon.minAmount)}.`
+			);
       return;
     }
 
@@ -90,17 +212,62 @@ const OrderSummary = () => {
     setCouponMessage("Coupon applied.");
   };
 
-  const subtotal = cartAmount;
-  const totalBeforeTax = subtotal - discountAmount + shippingFee;
-  const tax = Math.floor(totalBeforeTax * 0.02);
-  const total = totalBeforeTax + tax;
+	const subtotal = cartAmount;
+	const totalBeforeTax = subtotal - discountAmount + shippingFee;
+	const tax = Math.floor(totalBeforeTax * 0.02);
+	const total = totalBeforeTax + tax;
+
+	const handlePayWithPaystack = () => {
+		if (!selectedAddress) {
+			setCouponMessage("Select a delivery address before paying.");
+			return;
+		}
+		if (total <= 0) {
+			setCouponMessage("Add items to your cart before paying.");
+			return;
+		}
+		if (typeof window === "undefined" || !window.PaystackPop) {
+			setCouponMessage("Payment system is still loading. Please try again.");
+			return;
+		}
+		const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+		if (!publicKey) {
+			setCouponMessage("Payment configuration is missing. Contact support.");
+			return;
+		}
+		setIsPaying(true);
+		const amountInKobo = Math.round(total * 100);
+		const ref = `RAYLUX_${Date.now()}`;
+		const paystack = window.PaystackPop.setup({
+			key: publicKey,
+			email: authUser && authUser.email ? authUser.email : "customer@example.com",
+			amount: amountInKobo,
+			ref,
+			callback: function (response) {
+				createOrder(response && response.reference ? response.reference : ref)
+					.then(() => {
+						setIsPaying(false);
+						router.push("/order-placed");
+					})
+					.catch(() => {
+						setIsPaying(false);
+					});
+			},
+			onClose: function () {
+				setIsPaying(false);
+			},
+		});
+		paystack.openIframe();
+	};
 
   useEffect(() => {
     fetchUserAddresses();
   }, [])
 
   return (
-    <div className="w-full md:w-96 bg-gray-500/5 p-5">
+		<>
+			<Script src="https://js.paystack.co/v1/inline.js" strategy="afterInteractive" />
+			<div className="w-full md:w-96 bg-gray-500/5 p-5">
       <h2 className="text-xl md:text-2xl font-medium text-gray-700">
         Order Summary
       </h2>
@@ -177,52 +344,53 @@ const OrderSummary = () => {
         <hr className="border-gray-500/30 my-5" />
 
         <div className="space-y-4">
-          <div className="flex justify-between text-base font-medium">
-            <p className="uppercase text-gray-600">Items {cartCount}</p>
-            <p className="text-gray-800">
-              {currency}
-              {subtotal}
-            </p>
-          </div>
-          <div className="flex justify-between">
-            <p className="text-gray-600">Shipping Fee</p>
-            <p className="font-medium text-gray-800">
-              {shippingFee === 0 ? "Free" : `${currency}${shippingFee}`}
-            </p>
-          </div>
+			<div className="flex justify-between text-base font-medium">
+				<p className="uppercase text-gray-600">Items {cartCount}</p>
+				<p className="text-gray-800">
+					{formatCurrency(subtotal)}
+				</p>
+			</div>
+			<div className="flex justify-between">
+				<p className="text-gray-600">Shipping Fee</p>
+				<p className="font-medium text-gray-800">
+					{shippingFee === 0 ? "Free" : formatCurrency(shippingFee)}
+				</p>
+			</div>
           {discountAmount > 0 && (
             <div className="flex justify-between">
               <p className="text-gray-600">
                 Coupon discount{appliedCoupon ? ` (${appliedCoupon.code})` : ""}
               </p>
-              <p className="font-medium text-gray-800">
-                -{currency}
-                {discountAmount}
-              </p>
+						<p className="font-medium text-gray-800">
+							- {formatCurrency(discountAmount)}
+						</p>
             </div>
           )}
-          <div className="flex justify-between">
-            <p className="text-gray-600">Tax (2%)</p>
-            <p className="font-medium text-gray-800">
-              {currency}
-              {tax}
-            </p>
-          </div>
-          <div className="flex justify-between text-lg md:text-xl font-medium border-t pt-3">
-            <p>Total</p>
-            <p>
-              {currency}
-              {total}
-            </p>
-          </div>
+			<div className="flex justify-between">
+				<p className="text-gray-600">Tax (2%)</p>
+				<p className="font-medium text-gray-800">
+					{formatCurrency(tax)}
+				</p>
+			</div>
+			<div className="flex justify-between text-lg md:text-xl font-medium border-t pt-3">
+				<p>Total</p>
+				<p>
+					{formatCurrency(total)}
+				</p>
+			</div>
         </div>
       </div>
 
-      <button onClick={createOrder} className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700">
-        Place Order
-      </button>
-    </div>
-  );
+				<button
+					onClick={handlePayWithPaystack}
+					disabled={isPaying}
+					className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700 disabled:opacity-70 disabled:cursor-not-allowed"
+				>
+					{isPaying ? "Processing payment..." : "Pay with Paystack"}
+				</button>
+			</div>
+		</>
+		);
 };
 
 export default OrderSummary;

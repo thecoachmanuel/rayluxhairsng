@@ -79,7 +79,7 @@ const FeaturedManager = () => {
                     {product.description}
                   </p>
                   <p className="text-xs text-gray-600">
-                    {product.category} • ${product.offerPrice}
+									{product.category} • ₦{product.offerPrice}
                   </p>
                 </div>
                 <div
@@ -109,4 +109,3 @@ const FeaturedManager = () => {
 };
 
 export default FeaturedManager;
-

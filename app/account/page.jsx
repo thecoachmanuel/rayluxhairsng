@@ -13,6 +13,8 @@ const AccountPageContent = () => {
     signUp,
     signOut,
     router,
+    membership,
+    joinMembership,
   } = useAppContext();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState("sign-in");
@@ -21,6 +23,7 @@ const AccountPageContent = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [membershipMessage, setMembershipMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -100,6 +103,53 @@ const AccountPageContent = () => {
                 Sign out
               </button>
             </div>
+          </div>
+          <div className="mt-6 border border-orange-100 rounded-lg p-6 bg-orange-50/60 space-y-3">
+            <h2 className="text-base font-semibold text-gray-900">
+              RayLux VIP membership
+            </h2>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Join RayLux VIP to unlock special coupon drops, early access to new
+              textures, and surprise gifts for loyal customers.
+            </p>
+            {membership && membership.is_active ? (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-green-700">
+                  You are an active {membership.tier || "VIP"} member.
+                </p>
+                <p className="text-xs text-gray-600">
+                  Watch your email and WhatsApp for exclusive RayLux discount codes.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setMembershipMessage("");
+                    const { error } = await joinMembership();
+                    if (error) {
+                      setMembershipMessage(
+                        error.message || "Unable to join membership right now."
+                      );
+                    } else {
+                      setMembershipMessage("You are now a RayLux VIP member.");
+                    }
+                  }}
+                  className="px-4 py-2 rounded-md bg-gray-900 hover:bg-black text-white text-sm cursor-pointer"
+                >
+                  Join RayLux VIP
+                </button>
+                <p className="text-xs text-gray-600">
+                  Membership is free. You will receive special coupon codes like
+                  <span className="font-semibold"> RAYLUXVIP</span> for huge
+                  discounts during campaigns.
+                </p>
+              </div>
+            )}
+            {membershipMessage && (
+              <p className="text-xs text-orange-700 mt-1">{membershipMessage}</p>
+            )}
           </div>
         </div>
         <Footer />

@@ -13,6 +13,7 @@ const Orders = () => {
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [updatingOrderId, setUpdatingOrderId] = useState(null);
 
     const fetchSellerOrders = async () => {
         if (supabase) {
@@ -30,6 +31,25 @@ const Orders = () => {
         setLoading(false);
     }
 
+    const handleStatusChange = async (orderId, newStatus) => {
+        if (!supabase) return;
+        setUpdatingOrderId(orderId);
+        const { error } = await supabase
+            .from("orders")
+            .update({ status: newStatus })
+            .eq("id", orderId);
+        if (!error) {
+            setOrders((prev) =>
+                prev.map((order) =>
+                    (order.id || order._id) === orderId
+                        ? { ...order, status: newStatus }
+                        : order
+                )
+            );
+        }
+        setUpdatingOrderId(null);
+    };
+
     useEffect(() => {
         fetchSellerOrders();
     }, []);
@@ -39,8 +59,10 @@ const Orders = () => {
             {loading ? <Loading /> : <div className="md:p-10 p-4 space-y-5">
                 <h2 className="text-lg font-medium">Orders</h2>
                 <div className="max-w-4xl rounded-md">
-                    {orders.map((order, index) => (
-                        <div key={order.id || order._id || index} className="flex flex-col md:flex-row gap-5 justify-between p-5 border-t border-gray-300">
+                    {orders.map((order, index) => {
+                        const rowId = order.id || order._id || index;
+                        return (
+                        <div key={rowId} className="flex flex-col md:flex-row gap-5 justify-between p-5 border-t border-gray-300">
                             <div className="flex-1 flex gap-5 max-w-80">
                                 <div className="max-w-16 max-h-16 flex items-center justify-center">
                                     <BoxIcon />
@@ -63,16 +85,29 @@ const Orders = () => {
                                     <span>{order.address.phone_number}</span>
                                 </p>
                             </div>
-                            <p className="font-medium my-auto">{currency}{order.amount}</p>
-                            <div>
-                                <p className="flex flex-col">
-                                    <span>Method : COD</span>
-                                    <span>Date : {new Date(order.created_at || order.date).toLocaleDateString()}</span>
-                                    <span>Payment : Pending</span>
-                                </p>
+                                <p className="font-medium my-auto">₦{order.amount}</p>
+                            <div className="flex flex-col gap-1 text-sm my-auto min-w-[160px]">
+                                <span>Method : {order.payment_method || "Online"}</span>
+                                <span>Date : {new Date(order.created_at || order.date).toLocaleDateString()}</span>
+                                <div className="flex items-center gap-2">
+                                    <span>Status :</span>
+                                    <select
+                                        value={order.status || "Processing"}
+                                        onChange={(event) => handleStatusChange(rowId, event.target.value)}
+                                        disabled={updatingOrderId === rowId}
+                                        className="border border-gray-300 rounded-md px-2 py-1 text-xs bg-white outline-none"
+                                    >
+                                        <option value="Processing">Processing</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Shipped">Shipped</option>
+                                        <option value="Delivered">Delivered</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>}
             <Footer />

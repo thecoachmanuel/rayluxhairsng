@@ -86,7 +86,7 @@ const ProductList = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3 max-sm:hidden">{product.category}</td>
-                  <td className="px-4 py-3">${product.offerPrice}</td>
+									<td className="px-4 py-3">₦{product.offerPrice}</td>
                   <td className="px-4 py-3 max-sm:hidden">
                     <div className="flex items-center gap-2">
                       <button

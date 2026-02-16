@@ -114,9 +114,9 @@ const AnalyticsPage = () => {
         </head>
         <body>
           <h1>RayLux Hairs Analytics</h1>
-          <p><strong>Total revenue:</strong> ${currency}${summary.totalRevenue.toFixed(
-            2
-          )}</p>
+						<p><strong>Total revenue:</strong> ₦${summary.totalRevenue.toFixed(
+							2
+						)}</p>
           <p><strong>Total orders:</strong> ${summary.totalOrders}</p>
           <table>
             <thead>

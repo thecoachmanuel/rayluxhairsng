@@ -90,12 +90,12 @@ const Product = () => {
                     <p className="text-gray-600 mt-3">
                         {productData.description}
                     </p>
-                    <p className="text-3xl font-medium mt-6">
-                        ${productData.offerPrice}
-                        <span className="text-base font-normal text-gray-800/60 line-through ml-2">
-                            ${productData.price}
-                        </span>
-                    </p>
+						<p className="text-3xl font-medium mt-6">
+							₦{productData.offerPrice}
+							<span className="text-base font-normal text-gray-800/60 line-through ml-2">
+								₦{productData.price}
+							</span>
+						</p>
                     <hr className="bg-gray-600 my-6" />
                     <div className="overflow-x-auto">
                         <table className="table-auto border-collapse w-full max-w-72">
