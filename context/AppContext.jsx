@@ -744,6 +744,12 @@ export const AppContextProvider = (props) => {
 			});
 			const data = await response.json().catch(() => ({}));
 			if (response.ok && data && data.ok) {
+				if (supabase && authUser) {
+					try {
+						await supabase.auth.updateUser({ password: input });
+					} catch (_error) {
+					}
+				}
 				setAdminVerified(true);
 				return true;
 			}
