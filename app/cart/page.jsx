@@ -40,19 +40,30 @@ const Cart = () => {
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(cartItems).map((itemId) => {
-                  const product = products.find(product => product._id === itemId);
-
-                  if (!product || cartItems[itemId] <= 0) return null;
+				{Object.keys(cartItems).map((itemId) => {
+					const product = products.find((product) => product._id === itemId);
+				
+					if (!product || cartItems[itemId] <= 0) return null;
+					let primaryImage = "";
+					if (product.image) {
+						if (Array.isArray(product.image) && product.image.length > 0) {
+							primaryImage = product.image.find((value) => typeof value === "string" && value) || "";
+						} else if (typeof product.image === "string") {
+							primaryImage = product.image;
+						}
+					}
+					if (!primaryImage) {
+						primaryImage = "/raylux-hairs/raw-straight-bundles-1.jpg";
+					}
 
                   return (
                     <tr key={itemId}>
                       <td className="flex items-center gap-4 py-4 md:px-4 px-1">
                         <div>
                           <div className="rounded-lg overflow-hidden bg-gray-500/10 p-2">
-                            <Image
-                              src={product.image[0]}
-                              alt={product.name}
+								<Image
+									src={primaryImage}
+									alt={product.name}
                               className="w-16 h-auto object-cover mix-blend-multiply"
                               width={1280}
                               height={720}

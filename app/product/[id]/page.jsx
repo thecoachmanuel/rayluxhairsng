@@ -20,15 +20,26 @@ const Product = () => {
     const [productData, setProductData] = useState(null);
 
     const fetchProductData = () => {
-        let allProducts = products && products.length > 0 ? products : productsDummyData;
-        const product = allProducts.find((item) => item._id === id);
-        if (product) {
-            setProductData(product);
-            if (!mainImage && Array.isArray(product.image) && product.image.length > 0) {
-                setMainImage(product.image[0]);
-            }
-        }
-    }
+			let allProducts = products && products.length > 0 ? products : productsDummyData;
+			const product = allProducts.find((item) => item._id === id);
+			if (product) {
+				let primaryImage = "";
+				if (product.image) {
+					if (Array.isArray(product.image) && product.image.length > 0) {
+						primaryImage = product.image.find((value) => typeof value === "string" && value) || "";
+					} else if (typeof product.image === "string") {
+						primaryImage = product.image;
+					}
+				}
+				if (!primaryImage) {
+					primaryImage = "/raylux-hairs/raw-straight-bundles-1.jpg";
+				}
+				setProductData({ ...product, image: Array.isArray(product.image) ? product.image : [primaryImage] });
+				if (!mainImage) {
+					setMainImage(primaryImage);
+				}
+			}
+		};
 
     useEffect(() => {
         fetchProductData();
@@ -50,7 +61,7 @@ const Product = () => {
                     </div>
 
                     <div className="grid grid-cols-4 gap-4">
-                        {productData.image.map((image, index) => (
+                        {Array.isArray(productData.image) && productData.image.map((image, index) => (
                             <div
                                 key={index}
                                 onClick={() => setMainImage(image)}
