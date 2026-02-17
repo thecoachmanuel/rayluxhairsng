@@ -10,11 +10,27 @@ export const useAppContext = () => {
   return useContext(AppContext);
 };
 
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+  .split(",")
+  .map((value) => value.trim().toLowerCase())
+  .filter(Boolean);
+
+const isAdminEmail = (email) => {
+  if (!email) {
+    return false;
+  }
+  const normalized = email.trim().toLowerCase();
+  if (ADMIN_EMAILS.length === 0) {
+    return normalized === "rayluxhairsng@gmail.com";
+  }
+  return ADMIN_EMAILS.includes(normalized);
+};
+
 export const AppContextProvider = (props) => {
 
 	const currency = "₦";
-  const router = useRouter();
-  const ADMIN_EMAIL = "rayluxhairsng@gmail.com";
+	const router = useRouter();
+
 
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(false);
@@ -44,6 +60,7 @@ export const AppContextProvider = (props) => {
   });
   const [coupons, setCoupons] = useState([]);
   const [membership, setMembership] = useState(null);
+	const [adminVerified, setAdminVerified] = useState(false);
   const [bannerContent, setBannerContent] = useState({
     title: "Level Up Your Look With RayLux Hairs",
     description: "From sleek straight to deep wave—premium human hair for every style.",
@@ -671,7 +688,7 @@ export const AppContextProvider = (props) => {
     });
     if (!result.error && result.data && result.data.user) {
       setAuthUser(result.data.user);
-      setIsSeller(result.data.user.email === ADMIN_EMAIL);
+		  setIsSeller(isAdminEmail(result.data.user.email));
     }
     return result;
   };
@@ -689,7 +706,7 @@ export const AppContextProvider = (props) => {
     });
     if (!result.error && result.data && result.data.user) {
       setAuthUser(result.data.user);
-      setIsSeller(result.data.user.email === ADMIN_EMAIL);
+		  setIsSeller(isAdminEmail(result.data.user.email));
     }
     return result;
   };
@@ -703,7 +720,40 @@ export const AppContextProvider = (props) => {
     await supabase.auth.signOut();
     setAuthUser(null);
     setIsSeller(false);
+		setAdminVerified(false);
   };
+
+	const verifyAdminPassword = async () => {
+		if (!isSeller) {
+			return false;
+		}
+		let input = null;
+		if (typeof window !== "undefined") {
+			input = window.prompt("Enter admin password");
+		}
+		if (!input) {
+			return false;
+		}
+		try {
+			const response = await fetch("/api/admin-auth", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ password: input }),
+			});
+			const data = await response.json().catch(() => ({}));
+			if (response.ok && data && data.ok) {
+				setAdminVerified(true);
+				return true;
+			}
+		} catch (_error) {
+		}
+		if (typeof window !== "undefined") {
+			window.alert("Incorrect admin password.");
+		}
+		return false;
+	};
 
   const updateBannerContent = (content) => {
     const nextContent = {
@@ -899,7 +949,7 @@ export const AppContextProvider = (props) => {
         }
         if (!error && data && data.user) {
           setAuthUser(data.user);
-          setIsSeller(data.user.email === ADMIN_EMAIL);
+		    setIsSeller(isAdminEmail(data.user.email));
         } else {
           setAuthUser(null);
           setIsSeller(false);
@@ -920,7 +970,7 @@ export const AppContextProvider = (props) => {
       }
       if (session && session.user) {
         setAuthUser(session.user);
-        setIsSeller(session.user.email === ADMIN_EMAIL);
+		  setIsSeller(isAdminEmail(session.user.email));
       } else {
         setAuthUser(null);
         setIsSeller(false);
@@ -985,6 +1035,8 @@ export const AppContextProvider = (props) => {
     wishlistIds,
     toggleWishlistItem,
     isWishlisted,
+		adminVerified,
+		verifyAdminPassword,
   };
 
   return (
