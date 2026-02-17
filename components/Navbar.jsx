@@ -40,7 +40,7 @@ const Navbar = () => {
 	};
 
 	return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 text-gray-700">
+	    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 bg-white/90 backdrop-blur text-gray-700">
       <button
         type="button"
         onClick={() => router.push("/")}
