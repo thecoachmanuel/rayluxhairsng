@@ -22,8 +22,8 @@ const SideBar = () => {
         { name: 'Messages', path: '/seller/messages', icon: assets.box_icon },
     ];
 
-	return (
-		<div className='w-full md:w-64 border-b md:border-b-0 md:border-r md:min-h-screen text-base border-gray-300 py-2 flex flex-col'>
+    return (
+        <div className='md:w-64 w-16 border-r min-h-screen text-base border-gray-300 py-2 flex flex-col'>
             {menuItems.map((item) => {
 
                 const isActive = pathname === item.path;

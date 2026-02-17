@@ -34,18 +34,14 @@ const Product = () => {
         fetchProductData();
     }, [id, products.length])
 
-    const primaryImage = Array.isArray(productData.image) && productData.image.length > 0 && productData.image[0]
-		? productData.image[0]
-		: "/raylux-hairs/raw-straight-bundles-1.jpg";
-
-		return productData ? (<>
+    return productData ? (<>
         <Navbar />
         <div className="px-6 md:px-16 lg:px-32 pt-14 space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                 <div className="px-5 lg:px-16 xl:px-20">
                     <div className="rounded-lg overflow-hidden bg-gray-500/10 mb-4">
                         <Image
-								src={mainImage || primaryImage}
+                            src={mainImage || productData.image[0]}
                             alt="alt"
                             className="w-full h-auto object-cover mix-blend-multiply"
                             width={1280}
@@ -54,7 +50,7 @@ const Product = () => {
                     </div>
 
                     <div className="grid grid-cols-4 gap-4">
-							{(Array.isArray(productData.image) && productData.image.length > 0 ? productData.image : [primaryImage]).map((image, index) => (
+                        {productData.image.map((image, index) => (
                             <div
                                 key={index}
                                 onClick={() => setMainImage(image)}

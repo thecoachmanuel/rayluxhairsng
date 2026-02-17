@@ -73,20 +73,13 @@ const ProductList = () => {
                 <tr key={index} className="border-t border-gray-500/20">
                   <td className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate">
                     <div className="bg-gray-500/10 rounded p-2">
-											{(() => {
-												const primaryImage = Array.isArray(product.image) && product.image.length > 0 && product.image[0]
-													? product.image[0]
-													: "/raylux-hairs/raw-straight-bundles-1.jpg";
-												return (
                       <Image
-												src={primaryImage}
+                        src={product.image[0]}
                         alt="product Image"
                         className="w-16"
                         width={1280}
                         height={720}
                       />
-											);
-											})()}
                     </div>
                     <span className="truncate w-full">
                       {product.name}

@@ -7,9 +7,6 @@ const ProductCard = ({ product }) => {
 
 
 	const { currency, router, toggleWishlistItem, isWishlisted, addToCart, formatCurrency } = useAppContext()
-	const primaryImage = Array.isArray(product.image) && product.image.length > 0 && product.image[0]
-		? product.image[0]
-		: "/raylux-hairs/raw-straight-bundles-1.jpg";
 
     return (
         <div
@@ -18,7 +15,7 @@ const ProductCard = ({ product }) => {
         >
 			<div className="cursor-pointer group relative bg-gray-500/10 rounded-lg w-full h-52 flex items-center justify-center">
 				<Image
-						src={primaryImage}
+						src={product.image[0]}
 						alt={product.name}
 						className="group-hover:scale-105 transition object-cover w-4/5 h-4/5 md:w-full md:h-full"
 						width={800}
