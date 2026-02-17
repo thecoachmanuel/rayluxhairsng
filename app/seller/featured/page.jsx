@@ -62,15 +62,22 @@ const FeaturedManager = () => {
                     : "border-gray-300 bg-white"
                 }`}
               >
-                <div className="w-full h-32 rounded-md overflow-hidden bg-gray-100">
-                  <Image
-                    src={product.image[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    width={400}
-                    height={400}
-                  />
-                </div>
+					<div className="w-full h-32 rounded-md overflow-hidden bg-gray-100">
+						{(() => {
+							const primaryImage = Array.isArray(product.image) && product.image.length > 0 && product.image[0]
+								? product.image[0]
+								: "/raylux-hairs/raw-straight-bundles-1.jpg";
+							return (
+								<Image
+									src={primaryImage}
+									alt={product.name}
+									className="w-full h-full object-cover"
+									width={400}
+									height={400}
+								/>
+							);
+						})()}
+					</div>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-gray-800">
                     {product.name}
