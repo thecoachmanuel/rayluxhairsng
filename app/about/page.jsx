@@ -95,10 +95,10 @@ const AboutPage = () => {
               is happy to guide you.
             </p>
             <p className="font-medium text-gray-900">
-              Call/WhatsApp: {branding.footerPhone || "+234 000 000 0000"}
+              Call/WhatsApp: {branding.footerPhone || "+234 (814) 118 1909"}
             </p>
             <p className="font-medium text-gray-900">
-              Email: {branding.footerEmail || "support@rayluxhairs.com"}
+              Email: {branding.footerEmail || "rayluxhairsng@gmail.com"}
             </p>
           </div>
         </section>
@@ -109,4 +109,3 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
-

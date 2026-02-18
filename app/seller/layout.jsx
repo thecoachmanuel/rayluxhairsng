@@ -5,7 +5,7 @@ import React from 'react'
 
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white pt-14 md:pt-16">
       <Navbar />
       <div className="flex flex-1 w-full">
         <Sidebar />

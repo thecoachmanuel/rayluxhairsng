@@ -11,9 +11,10 @@ const HeaderSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    if (!heroSlides.length) return;
+    const total = heroSlides.length || 1;
+    if (total <= 1) return;
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % total);
     }, 3000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);

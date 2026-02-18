@@ -156,11 +156,11 @@ const ContactPage = () => {
               <div className="space-y-3 text-sm text-gray-700">
                 <p>
                   <span className="font-medium">Phone/WhatsApp: </span>
-                  {branding.footerPhone || "+234 000 000 0000"}
+                  {branding.footerPhone || "+234 (814) 118 1909"}
                 </p>
                 <p>
                   <span className="font-medium">Email: </span>
-                  {branding.footerEmail || "support@rayluxhairs.com"}
+                  {branding.footerEmail || "rayluxhairsng@gmail.com"}
                 </p>
               </div>
             </div>
@@ -173,4 +173,3 @@ const ContactPage = () => {
 };
 
 export default ContactPage;
-

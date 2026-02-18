@@ -44,8 +44,8 @@ export const AppContextProvider = (props) => {
     logoUrl: "",
     footerDescription:
       "RayLux Hairs delivers premium, long‑lasting human hair bundles, wigs, and closures. Soft textures, full volume, and salon‑ready quality for every occasion.",
-    footerPhone: "+1 (000) 000 0000",
-    footerEmail: "support@rayluxhairs.com",
+    footerPhone: "+234 (814) 118 1909",
+    footerEmail: "rayluxhairsng@gmail.com",
     sellerFooterNote:
       "Copyright 2025 © RayLux Hairs Admin Portal. All rights reserved.",
     facebookUrl: "#",
