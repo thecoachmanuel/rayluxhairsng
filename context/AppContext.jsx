@@ -52,17 +52,11 @@ export const AppContextProvider = (props) => {
     twitterUrl: "#",
     instagramUrl: "#",
   });
-
   const [newsletterEmails, setNewsletterEmails] = useState([]);
   const [shippingSettings, setShippingSettings] = useState({
     baseFee: 0,
     perItemFee: 0,
     freeShippingThreshold: 0,
-  });
-  const [membershipSettings, setMembershipSettings] = useState({
-    price: 0,
-    benefits:
-      "Join RayLux VIP to unlock special coupon drops, early access to new textures, and surprise gifts for loyal customers.",
   });
   const [coupons, setCoupons] = useState([]);
   const [membership, setMembership] = useState(null);
@@ -236,16 +230,6 @@ export const AppContextProvider = (props) => {
                 typeof row.button_text2 === "string" ? row.button_text2 : "",
               imageUrl:
                 typeof row.image_url === "string" ? row.image_url : "",
-              primaryProductId:
-                typeof row.primary_product_id === "string" ||
-                typeof row.primary_product_id === "number"
-                  ? String(row.primary_product_id)
-                  : "",
-              secondaryProductId:
-                typeof row.secondary_product_id === "string" ||
-                typeof row.secondary_product_id === "number"
-                  ? String(row.secondary_product_id)
-                  : "",
             }));
             setHeroSlides(slides);
             return;
@@ -308,8 +292,6 @@ export const AppContextProvider = (props) => {
         button_text1: slide.buttonText1 || "",
         button_text2: slide.buttonText2 || "",
         image_url: slide.imageUrl || "",
-        primary_product_id: slide.primaryProductId || null,
-        secondary_product_id: slide.secondaryProductId || null,
         order_index: index,
       }));
       supabase.from("hero_slides").upsert(payload);
@@ -527,79 +509,6 @@ export const AppContextProvider = (props) => {
       localStorage.setItem(
         "raylux_shipping_settings",
         JSON.stringify(nextSettings)
-      );
-    } catch (error) {
-    }
-  };
-
-  const loadMembershipSettings = () => {
-    if (supabase) {
-      supabase
-        .from("membership_settings")
-        .select("*")
-        .limit(1)
-        .then((result) => {
-          if (!result.error && Array.isArray(result.data) && result.data[0]) {
-            const row = result.data[0];
-            setMembershipSettings({
-              price:
-                typeof row.price === "number"
-                  ? row.price
-                  : membershipSettings.price,
-              benefits:
-                typeof row.benefits === "string" && row.benefits
-                  ? row.benefits
-                  : membershipSettings.benefits,
-            });
-            return;
-          }
-        });
-      return;
-    }
-    try {
-      const stored = localStorage.getItem("raylux_membership_settings");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === "object") {
-          setMembershipSettings({
-            price:
-              typeof parsed.price === "number"
-                ? parsed.price
-                : membershipSettings.price,
-            benefits:
-              typeof parsed.benefits === "string" && parsed.benefits
-                ? parsed.benefits
-                : membershipSettings.benefits,
-          });
-        }
-      }
-    } catch (error) {
-    }
-  };
-
-  const updateMembershipSettings = (settings) => {
-    const nextSettings = {
-      ...membershipSettings,
-      ...settings,
-    };
-    const numericPrice = Number(nextSettings.price) || 0;
-    const finalSettings = {
-      price: numericPrice,
-      benefits: nextSettings.benefits || "",
-    };
-    setMembershipSettings(finalSettings);
-    if (supabase) {
-      const payload = {
-        id: 1,
-        price: finalSettings.price,
-        benefits: finalSettings.benefits,
-      };
-      supabase.from("membership_settings").upsert([payload]);
-    }
-    try {
-      localStorage.setItem(
-        "raylux_membership_settings",
-        JSON.stringify(finalSettings)
       );
     } catch (error) {
     }
@@ -1031,7 +940,6 @@ export const AppContextProvider = (props) => {
     loadBranding();
     loadNewsletterEmails();
     loadShippingSettings();
-    loadMembershipSettings();
     loadCoupons();
     loadWishlist();
     if (!supabase) {
@@ -1124,8 +1032,6 @@ export const AppContextProvider = (props) => {
     addNewsletterEmail,
     shippingSettings,
     updateShippingSettings,
-    membershipSettings,
-    updateMembershipSettings,
     coupons,
     addCoupon,
     updateCoupon,

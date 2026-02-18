@@ -14,7 +14,7 @@ const AccountPageContent = () => {
     signOut,
     router,
     membership,
-    membershipSettings,
+    joinMembership,
   } = useAppContext();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState("sign-in");
@@ -125,18 +125,25 @@ const AccountPageContent = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setMembershipMessage("");
-                    router.push("/membership?redirect=/account");
+                    const { error } = await joinMembership();
+                    if (error) {
+                      setMembershipMessage(
+                        error.message || "Unable to join membership right now."
+                      );
+                    } else {
+                      setMembershipMessage("You are now a RayLux VIP member.");
+                    }
                   }}
                   className="px-4 py-2 rounded-md bg-gray-900 hover:bg-black text-white text-sm cursor-pointer"
                 >
-                  View membership options
+                  Join RayLux VIP
                 </button>
                 <p className="text-xs text-gray-600">
-                  RayLux VIP membership gives you special coupon drops and early
-                  access to new textures. Pricing and benefits are shown on the
-                  membership page.
+                  Membership is free. You will receive special coupon codes like
+                  <span className="font-semibold"> RAYLUXVIP</span> for huge
+                  discounts during campaigns.
                 </p>
               </div>
             )}

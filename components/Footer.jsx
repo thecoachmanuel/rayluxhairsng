@@ -2,7 +2,7 @@ import React from "react";
 import { useAppContext } from "@/context/AppContext";
 
 const Footer = () => {
-  const { branding, router } = useAppContext();
+  const { branding } = useAppContext();
 
   return (
     <footer>
@@ -21,40 +21,24 @@ const Footer = () => {
             <h2 className="font-medium text-gray-900 mb-5">Company</h2>
             <ul className="text-sm space-y-2">
               <li>
-                <button
-                  type="button"
-                  onClick={() => router.push("/")}
-                  className="hover:underline transition cursor-pointer text-left"
-                >
+                <a className="hover:underline transition" href="#">
                   Home
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => router.push("/about")}
-                  className="hover:underline transition cursor-pointer text-left"
-                >
+                <a className="hover:underline transition" href="#">
                   About RayLux Hairs
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => router.push("/contact")}
-                  className="hover:underline transition cursor-pointer text-left"
-                >
+                <a className="hover:underline transition" href="#">
                   Contact us
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => router.push("/membership")}
-                  className="hover:underline transition cursor-pointer text-left"
-                >
-                  RayLux membership
-                </button>
+                <a className="hover:underline transition" href="#">
+                  Privacy policy
+                </a>
               </li>
             </ul>
           </div>

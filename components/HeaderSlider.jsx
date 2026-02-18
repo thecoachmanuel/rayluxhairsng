@@ -4,7 +4,7 @@ import { assets } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 
 const HeaderSlider = () => {
-  const { heroSlides, router } = useAppContext();
+  const { heroSlides } = useAppContext();
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -18,24 +18,6 @@ const HeaderSlider = () => {
 
   const handleSlideChange = (index) => {
     setCurrentSlide(index);
-  };
-
-  const handlePrimaryClick = (slide) => {
-    const targetId = slide.primaryProductId || "";
-    if (targetId) {
-      router.push(`/product/${targetId}`);
-      return;
-    }
-    router.push("/all-products");
-  };
-
-  const handleSecondaryClick = (slide) => {
-    const targetId = slide.secondaryProductId || "";
-    if (targetId) {
-      router.push(`/product/${targetId}`);
-      return;
-    }
-    router.push("/all-products");
   };
 
   return (
@@ -61,18 +43,10 @@ const HeaderSlider = () => {
                 {slide.title}
               </h1>
               <div className="flex items-center mt-4 md:mt-6 ">
-                <button
-                  type="button"
-                  onClick={() => handlePrimaryClick(slide)}
-                  className="md:px-10 px-7 md:py-2.5 py-2 bg-orange-600 rounded-full text-white font-medium"
-                >
+                <button className="md:px-10 px-7 md:py-2.5 py-2 bg-orange-600 rounded-full text-white font-medium">
                   {slide.buttonText1}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleSecondaryClick(slide)}
-                  className="group flex items-center gap-2 px-6 py-2.5 font-medium"
-                >
+                <button className="group flex items-center gap-2 px-6 py-2.5 font-medium">
                   {slide.buttonText2}
                   <Image
                     className="group-hover:translate-x-1 transition"
