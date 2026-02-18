@@ -10,14 +10,49 @@ const HeaderSlider = () => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const slides = heroSlides.length
+    ? heroSlides
+    : [
+        {
+          id: "slide_1",
+          title: "Luxury human hair bundles for everyday glam.",
+          offer: "This week only – up to 30% off bundles",
+          buttonText1: "Shop bundles",
+          buttonText2: "View collections",
+          imageUrl: "/raylux-hairs/raw-straight-bundles-1.jpg",
+          primaryProductId: "",
+          secondaryProductId: "",
+        },
+        {
+          id: "slide_2",
+          title: "Switch up your look with premium wigs and frontals.",
+          offer: "Limited stock on best‑selling units",
+          buttonText1: "Shop wigs",
+          buttonText2: "See lace frontals",
+          imageUrl: "/raylux-hairs/body-wave-lace-wig-1.jpg",
+          primaryProductId: "",
+          secondaryProductId: "",
+        },
+        {
+          id: "slide_3",
+          title: "RayLux Hairs – soft, tangle‑free textures that last.",
+          offer: "Bundle deals for salon owners and resellers",
+          buttonText1: "Shop RayLux deals",
+          buttonText2: "Become a reseller",
+          imageUrl: "/raylux-hairs/360-lace-wig-22-1.jpg",
+          primaryProductId: "",
+          secondaryProductId: "",
+        },
+      ];
+
   useEffect(() => {
-    const total = heroSlides.length || 1;
+    const total = slides.length;
     if (total <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % total);
     }, 3000);
     return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  }, [slides.length]);
 
   const handleSlideChange = (index) => {
     setCurrentSlide(index);
@@ -38,21 +73,6 @@ const HeaderSlider = () => {
     }
     router.push("/all-products");
   };
-
-  const slides = heroSlides.length
-    ? heroSlides
-    : [
-        {
-          id: "default-hero",
-          title: "Premium bundles for every occasion",
-          offer: "RayLux VIP experience",
-          buttonText1: "Shop bundles",
-          buttonText2: "Explore all products",
-          primaryProductId: null,
-          secondaryProductId: null,
-          imageUrl: "/raylux-hairs/body-wave-lace-wig-1.jpg",
-        },
-      ];
 
   return (
     <div className="overflow-hidden relative w-full">
