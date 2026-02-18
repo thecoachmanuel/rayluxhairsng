@@ -38,6 +38,21 @@ const HeaderSlider = () => {
     router.push("/all-products");
   };
 
+  const slides = heroSlides.length
+    ? heroSlides
+    : [
+        {
+          id: "default-hero",
+          title: "Premium bundles for every occasion",
+          offer: "RayLux VIP experience",
+          buttonText1: "Shop bundles",
+          buttonText2: "Explore all products",
+          primaryProductId: null,
+          secondaryProductId: null,
+          imageUrl: "/raylux-hairs/body-wave-lace-wig-1.jpg",
+        },
+      ];
+
   return (
     <div className="overflow-hidden relative w-full">
       <div
@@ -46,7 +61,7 @@ const HeaderSlider = () => {
           transform: `translateX(-${currentSlide * 100}%)`,
         }}
       >
-        {heroSlides.map((slide, index) => {
+        {slides.map((slide, index) => {
           const imageSrc =
             slide.imageUrl ||
             "/raylux-hairs/body-wave-lace-wig-1.jpg";
@@ -94,7 +109,7 @@ const HeaderSlider = () => {
       </div>
 
       <div className="flex items-center justify-center gap-2 mt-8">
-        {heroSlides.map((_, index) => (
+        {slides.map((_, index) => (
           <div
             key={index}
             onClick={() => handleSlideChange(index)}

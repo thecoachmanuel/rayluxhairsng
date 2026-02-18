@@ -953,15 +953,21 @@ export const AppContextProvider = (props) => {
   };
 
   const updateProduct = async (id, updates) => {
-    const updatedProducts = products.map((product) =>
-      product._id === id ? { ...product, ...updates } : product
-    );
+    const updatedProducts = products.map((product) => {
+      const rawId = product._id !== undefined && product._id !== null ? product._id : product.id;
+      const matches = rawId !== undefined && rawId !== null && String(rawId) === String(id);
+      return matches ? { ...product, ...updates } : product;
+    });
     if (supabase) {
-      const target = products.find(
-        (product) => product._id === id || product.id === id
-      );
+      const target = products.find((product) => {
+        const rawId =
+          product._id !== undefined && product._id !== null
+            ? product._id
+            : product.id;
+        return rawId !== undefined && rawId !== null && String(rawId) === String(id);
+      });
       if (target) {
-        const rowId = target._id || target.id;
+        const rowId = target.id !== undefined && target.id !== null ? target.id : target._id;
         const payload = {};
         if (updates.name !== undefined) {
           payload.name = updates.name;
@@ -992,13 +998,20 @@ export const AppContextProvider = (props) => {
   };
 
   const deleteProduct = async (id) => {
-    const updatedProducts = products.filter((product) => product._id !== id);
+    const updatedProducts = products.filter((product) => {
+      const rawId = product._id !== undefined && product._id !== null ? product._id : product.id;
+      return !(rawId !== undefined && rawId !== null && String(rawId) === String(id));
+    });
     if (supabase) {
-      const target = products.find(
-        (product) => product._id === id || product.id === id
-      );
+      const target = products.find((product) => {
+        const rawId =
+          product._id !== undefined && product._id !== null
+            ? product._id
+            : product.id;
+        return rawId !== undefined && rawId !== null && String(rawId) === String(id);
+      });
       if (target) {
-        const rowId = target._id || target.id;
+        const rowId = target.id !== undefined && target.id !== null ? target.id : target._id;
         await supabase.from("products").delete().eq("id", rowId);
       }
       setProducts(updatedProducts);
