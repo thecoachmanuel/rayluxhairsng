@@ -14,6 +14,7 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [deletingOrderId, setDeletingOrderId] = useState(null);
     const [statusFilter, setStatusFilter] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const [paymentFilter, setPaymentFilter] = useState("All");
@@ -53,6 +54,31 @@ const Orders = () => {
             );
         }
         setUpdatingOrderId(null);
+    };
+
+    const handleDeleteOrder = async (orderId) => {
+        if (!supabase) return;
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this order?"
+        );
+        if (!confirmDelete) return;
+        setDeletingOrderId(orderId);
+        const { error: itemsError } = await supabase
+            .from("order_items")
+            .delete()
+            .eq("order_id", orderId);
+        if (!itemsError) {
+            const { error: orderError } = await supabase
+                .from("orders")
+                .delete()
+                .eq("id", orderId);
+            if (!orderError) {
+                setOrders((prev) =>
+                    prev.filter((order) => (order.id || order._id) !== orderId)
+                );
+            }
+        }
+        setDeletingOrderId(null);
     };
 
     useEffect(() => {
@@ -265,6 +291,16 @@ const Orders = () => {
                                                     <option value="Cancelled">Cancelled</option>
                                                 </select>
                                             </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteOrder(rowId)}
+                                                disabled={deletingOrderId === rowId}
+                                                className="mt-2 text-[11px] text-red-600 underline disabled:opacity-60"
+                                            >
+                                                {deletingOrderId === rowId
+                                                    ? "Deleting..."
+                                                    : "Delete order"}
+                                            </button>
                                         </div>
                                     </div>
                                 );

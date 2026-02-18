@@ -7,6 +7,7 @@ import Loading from "@/components/Loading";
 const MessagesPage = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchMessages = async () => {
     if (supabase) {
@@ -27,6 +28,23 @@ const MessagesPage = () => {
   useEffect(() => {
     fetchMessages();
   }, []);
+
+  const handleDeleteMessage = async (id) => {
+    if (!supabase) return;
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this message?"
+    );
+    if (!confirmDelete) return;
+    setDeletingId(id);
+    const { error } = await supabase
+      .from("contact_messages")
+      .delete()
+      .eq("id", id);
+    if (!error) {
+      setMessages((prev) => prev.filter((row) => row.id !== id));
+    }
+    setDeletingId(null);
+  };
 
   return (
     <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
@@ -49,6 +67,7 @@ const MessagesPage = () => {
                     <th className="px-4 py-2 text-left font-medium">Subject</th>
                     <th className="px-4 py-2 text-left font-medium">Message</th>
                     <th className="px-4 py-2 text-left font-medium">Date</th>
+                    <th className="px-4 py-2 text-left font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -83,6 +102,16 @@ const MessagesPage = () => {
                           ? new Date(row.created_at).toLocaleString()
                           : ""}
                       </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-xs">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteMessage(row.id)}
+                          disabled={deletingId === row.id}
+                          className="text-red-600 underline disabled:opacity-60"
+                        >
+                          {deletingId === row.id ? "Deleting..." : "Delete"}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -97,4 +126,3 @@ const MessagesPage = () => {
 };
 
 export default MessagesPage;
-
