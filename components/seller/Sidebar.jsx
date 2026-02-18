@@ -1,33 +1,49 @@
 import React from 'react';
 import Link from 'next/link';
-import { assets } from '../../assets/assets';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import {
+    PlusSquareIcon,
+    GridIcon,
+    StarBadgeIcon,
+    SlidesIcon,
+    BannerIcon,
+    BrushIcon,
+    MailIcon,
+    TicketIcon,
+    TruckIcon,
+    UsersIcon,
+    ChartBarIcon,
+    CreditCardIcon,
+    ReceiptIcon,
+    ChatBubbleIcon,
+} from '../../assets/assets';
 
 const SideBar = () => {
     const pathname = usePathname()
     const menuItems = [
-        { name: 'Add Product', path: '/seller', icon: assets.add_icon },
-        { name: 'Product List', path: '/seller/product-list', icon: assets.product_list_icon },
-        { name: 'Featured Section', path: '/seller/featured', icon: assets.star_icon },
-        { name: 'Hero Slider', path: '/seller/hero-slider', icon: assets.arrow_right_icon_colored },
-        { name: 'Homepage Banner', path: '/seller/banner', icon: assets.box_icon },
-        { name: 'Branding & Footer', path: '/seller/branding', icon: assets.box_icon },
-        { name: 'Newsletter', path: '/seller/newsletter', icon: assets.redirect_icon },
-        { name: 'Coupons', path: '/seller/coupons', icon: assets.decrease_arrow },
-        { name: 'Shipping & Fees', path: '/seller/shipping', icon: assets.box_icon },
-        { name: 'Customers', path: '/seller/customers', icon: assets.user_icon },
-        { name: 'Analytics', path: '/seller/analytics', icon: assets.increase_arrow },
-        { name: 'Payments', path: '/seller/payments', icon: assets.order_icon },
-        { name: 'Orders', path: '/seller/orders', icon: assets.order_icon },
-        { name: 'Messages', path: '/seller/messages', icon: assets.redirect_icon },
+        { name: 'Add Product', path: '/seller', icon: PlusSquareIcon },
+        { name: 'Product List', path: '/seller/product-list', icon: GridIcon },
+        { name: 'Featured Section', path: '/seller/featured', icon: StarBadgeIcon },
+        { name: 'Hero Slider', path: '/seller/hero-slider', icon: SlidesIcon },
+        { name: 'Homepage Banner', path: '/seller/banner', icon: BannerIcon },
+        { name: 'Branding & Footer', path: '/seller/branding', icon: BrushIcon },
+        { name: 'Newsletter', path: '/seller/newsletter', icon: MailIcon },
+        { name: 'Coupons', path: '/seller/coupons', icon: TicketIcon },
+        { name: 'Shipping & Fees', path: '/seller/shipping', icon: TruckIcon },
+        { name: 'Customers', path: '/seller/customers', icon: UsersIcon },
+        { name: 'Analytics', path: '/seller/analytics', icon: ChartBarIcon },
+        { name: 'Payments', path: '/seller/payments', icon: CreditCardIcon },
+        { name: 'Orders', path: '/seller/orders', icon: ReceiptIcon },
+        { name: 'Messages', path: '/seller/messages', icon: ChatBubbleIcon },
     ];
 
     return (
-        <div className='md:w-64 w-16 border-r min-h-screen text-base border-gray-300 py-2 flex flex-col'>
+        <div className='w-20 md:w-64 border-r min-h-screen text-base border-gray-300 py-2 flex flex-col'>
             {menuItems.map((item) => {
 
                 const isActive = pathname === item.path;
+
+                const Icon = item.icon;
 
                 return (
                     <Link href={item.path} key={item.name} passHref>
@@ -39,11 +55,7 @@ const SideBar = () => {
                                 }`
                             }
                         >
-                            <Image
-                                src={item.icon}
-                                alt={`${item.name.toLowerCase()}_icon`}
-                                className="w-5 h-5"
-                            />
+                            <Icon />
                             <p className='md:block hidden text-center'>{item.name}</p>
                         </div>
                     </Link>

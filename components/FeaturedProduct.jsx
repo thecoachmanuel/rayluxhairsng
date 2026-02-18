@@ -23,15 +23,28 @@ const FeaturedProduct = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-14 mt-12 md:px-14 px-4">
-        {featuredProducts.map((product) => (
-          <div key={product._id} className="relative group">
-            <Image
-              src={product.image[0]}
-              alt={product.name}
-              className="group-hover:brightness-75 transition duration-300 w-full h-64 object-cover"
-              width={800}
-              height={800}
-            />
+        {featuredProducts.map((product) => {
+          let primaryImage = "";
+          if (product && product.image) {
+            if (Array.isArray(product.image) && product.image.length > 0) {
+              primaryImage = product.image.find((value) => typeof value === "string" && value) || "";
+            } else if (typeof product.image === "string") {
+              primaryImage = product.image;
+            }
+          }
+          if (!primaryImage) {
+            primaryImage = "/raylux-hairs/raw-straight-bundles-1.jpg";
+          }
+
+          return (
+            <div key={product._id} className="relative group">
+              <Image
+                src={primaryImage}
+                alt={product.name}
+                className="group-hover:brightness-75 transition duration-300 w-full h-64 object-cover"
+                width={800}
+                height={800}
+              />
             <div className="group-hover:-translate-y-4 transition duration-300 absolute bottom-8 left-8 text-white space-y-2">
               <p className="font-medium text-xl lg:text-2xl">{product.name}</p>
               <p className="text-sm lg:text-base leading-5 max-w-60">
@@ -47,7 +60,8 @@ const FeaturedProduct = () => {
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

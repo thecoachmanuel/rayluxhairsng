@@ -5,11 +5,13 @@ import React from 'react'
 
 const Layout = ({ children }) => {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      <div className='flex w-full'>
+      <div className="flex flex-1 w-full">
         <Sidebar />
-        {children}
+        <div className="flex-1 min-h-screen overflow-x-hidden">
+          {children}
+        </div>
       </div>
     </div>
   )
