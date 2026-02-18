@@ -23,7 +23,9 @@ const Home = () => {
     <>
       <Navbar />
       <div className="px-6 md:px-16 lg:px-32">
-        <HeaderSlider />
+        <div className="hidden md:block">
+          <HeaderSlider />
+        </div>
         <HomeProducts />
         <FeaturedProduct />
         <Banner />
