@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 
 const HeroSliderManager = () => {
-  const { heroSlides, updateHeroSlides } = useAppContext();
+  const { heroSlides, updateHeroSlides, products } = useAppContext();
 
   const [title, setTitle] = useState("");
   const [offer, setOffer] = useState("");
@@ -14,6 +14,17 @@ const HeroSliderManager = () => {
   const [imageFile, setImageFile] = useState(null);
   const [uploadingNew, setUploadingNew] = useState(false);
   const [uploadingSlideId, setUploadingSlideId] = useState(null);
+  const [primaryProductId, setPrimaryProductId] = useState("");
+  const [secondaryProductId, setSecondaryProductId] = useState("");
+
+  const productOptions = Array.isArray(products)
+    ? products.map((product) => ({
+        id: product._id,
+        label: `${product.name}${
+          product.category ? ` (${product.category})` : ""
+        }`,
+      }))
+    : [];
 
   const uploadImageFile = async (file) => {
     if (!file) return null;
@@ -63,6 +74,8 @@ const HeroSliderManager = () => {
       buttonText1: buttonText1.trim() || "Shop now",
       buttonText2: buttonText2.trim() || "Learn more",
       imageUrl: finalImageUrl,
+      primaryProductId: primaryProductId || "",
+      secondaryProductId: secondaryProductId || "",
     };
     updateHeroSlides([...heroSlides, newSlide]);
     setUploadingNew(false);
@@ -72,6 +85,8 @@ const HeroSliderManager = () => {
     setButtonText2("");
     setImageUrl("");
     setImageFile(null);
+    setPrimaryProductId("");
+    setSecondaryProductId("");
   };
 
   const handleDeleteSlide = (id) => {
@@ -193,6 +208,54 @@ const HeroSliderManager = () => {
                       />
                     </div>
                   </div>
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    <div className="flex-1 min-w-[160px] flex flex-col gap-1">
+                      <label className="text-xs font-medium">
+                        Primary button product
+                      </label>
+                      <select
+                        value={slide.primaryProductId || ""}
+                        onChange={(event) =>
+                          handleUpdateField(
+                            slide.id,
+                            "primaryProductId",
+                            event.target.value
+                          )
+                        }
+                        className="outline-none py-2 px-3 rounded border border-gray-500/40 text-xs bg-white"
+                      >
+                        <option value="">No product selected</option>
+                        {productOptions.map((product) => (
+                          <option key={product.id} value={product.id}>
+                            {product.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1 min-w-[160px] flex flex-col gap-1">
+                      <label className="text-xs font-medium">
+                        Secondary button product
+                      </label>
+                      <select
+                        value={slide.secondaryProductId || ""}
+                        onChange={(event) =>
+                          handleUpdateField(
+                            slide.id,
+                            "secondaryProductId",
+                            event.target.value
+                          )
+                        }
+                        className="outline-none py-2 px-3 rounded border border-gray-500/40 text-xs bg-white"
+                      >
+                        <option value="">No product selected</option>
+                        {productOptions.map((product) => (
+                          <option key={product.id} value={product.id}>
+                            {product.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-medium">
@@ -296,6 +359,44 @@ const HeroSliderManager = () => {
                 className="outline-none py-2 px-3 rounded border border-gray-500/40 text-sm"
                 placeholder="View closures"
               />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="flex-1 min-w-[160px] flex flex col gap-1">
+              <label className="text-xs font-medium">
+                Primary button product
+              </label>
+              <select
+                value={primaryProductId}
+                onChange={(event) => setPrimaryProductId(event.target.value)}
+                className="outline-none py-2 px-3 rounded border border-gray-500/40 text-xs bg-white"
+              >
+                <option value="">No product selected</option>
+                {productOptions.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[160px] flex flex-col gap-1">
+              <label className="text-xs font-medium">
+                Secondary button product
+              </label>
+              <select
+                value={secondaryProductId}
+                onChange={(event) =>
+                  setSecondaryProductId(event.target.value)
+                }
+                className="outline-none py-2 px-3 rounded border border-gray-500/40 text-xs bg-white"
+              >
+                <option value="">No product selected</option>
+                {productOptions.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="flex flex-col gap-2">

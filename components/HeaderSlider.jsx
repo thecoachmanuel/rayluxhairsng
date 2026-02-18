@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { assets } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 
 const HeaderSlider = () => {
   const { heroSlides } = useAppContext();
+  const router = useRouter();
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -18,6 +20,22 @@ const HeaderSlider = () => {
 
   const handleSlideChange = (index) => {
     setCurrentSlide(index);
+  };
+
+  const handlePrimaryClick = (slide) => {
+    if (slide.primaryProductId) {
+      router.push(`/product/${slide.primaryProductId}`);
+      return;
+    }
+    router.push("/all-products");
+  };
+
+  const handleSecondaryClick = (slide) => {
+    if (slide.secondaryProductId) {
+      router.push(`/product/${slide.secondaryProductId}`);
+      return;
+    }
+    router.push("/all-products");
   };
 
   return (
@@ -43,10 +61,16 @@ const HeaderSlider = () => {
                 {slide.title}
               </h1>
               <div className="flex items-center mt-4 md:mt-6 ">
-                <button className="md:px-10 px-7 md:py-2.5 py-2 bg-orange-600 rounded-full text-white font-medium">
+                <button
+                  className="md:px-10 px-7 md:py-2.5 py-2 bg-orange-600 rounded-full text-white font-medium"
+                  onClick={() => handlePrimaryClick(slide)}
+                >
                   {slide.buttonText1}
                 </button>
-                <button className="group flex items-center gap-2 px-6 py-2.5 font-medium">
+                <button
+                  className="group flex items-center gap-2 px-6 py-2.5 font-medium"
+                  onClick={() => handleSecondaryClick(slide)}
+                >
                   {slide.buttonText2}
                   <Image
                     className="group-hover:translate-x-1 transition"

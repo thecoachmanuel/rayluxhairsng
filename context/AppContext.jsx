@@ -230,6 +230,14 @@ export const AppContextProvider = (props) => {
                 typeof row.button_text2 === "string" ? row.button_text2 : "",
               imageUrl:
                 typeof row.image_url === "string" ? row.image_url : "",
+              primaryProductId:
+                typeof row.primary_product_id === "string"
+                  ? row.primary_product_id
+                  : "",
+              secondaryProductId:
+                typeof row.secondary_product_id === "string"
+                  ? row.secondary_product_id
+                  : "",
             }));
             setHeroSlides(slides);
             return;
@@ -257,6 +265,8 @@ export const AppContextProvider = (props) => {
         buttonText1: "Shop bundles",
         buttonText2: "View collections",
         imageUrl: "/raylux-hairs/raw-straight-bundles-1.jpg",
+        primaryProductId: "",
+        secondaryProductId: "",
       },
       {
         id: "slide_2",
@@ -265,6 +275,8 @@ export const AppContextProvider = (props) => {
         buttonText1: "Shop wigs",
         buttonText2: "See lace frontals",
         imageUrl: "/raylux-hairs/body-wave-lace-wig-1.jpg",
+        primaryProductId: "",
+        secondaryProductId: "",
       },
       {
         id: "slide_3",
@@ -273,6 +285,8 @@ export const AppContextProvider = (props) => {
         buttonText1: "Shop RayLux deals",
         buttonText2: "Become a reseller",
         imageUrl: "/raylux-hairs/360-lace-wig-22-1.jpg",
+        primaryProductId: "",
+        secondaryProductId: "",
       },
     ];
     setHeroSlides(defaults);
@@ -292,6 +306,8 @@ export const AppContextProvider = (props) => {
         button_text1: slide.buttonText1 || "",
         button_text2: slide.buttonText2 || "",
         image_url: slide.imageUrl || "",
+        primary_product_id: slide.primaryProductId || null,
+        secondary_product_id: slide.secondaryProductId || null,
         order_index: index,
       }));
       supabase.from("hero_slides").upsert(payload);
