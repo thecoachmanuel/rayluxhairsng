@@ -16,6 +16,7 @@ const BrandingManager = () => {
   const [twitterUrl, setTwitterUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     setLogoUrl(branding.logoUrl || "");
@@ -28,17 +29,31 @@ const BrandingManager = () => {
     setInstagramUrl(branding.instagramUrl);
   }, [branding]);
 
-  const handleLogoFileChange = (event) => {
+  const handleLogoFileChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setLogoUrl(reader.result);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !uploadPreset) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    setUploadingLogo(true);
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+      if (response.ok && data.secure_url) {
+        setLogoUrl(data.secure_url);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (_error) {
+    }
+    setUploadingLogo(false);
   };
 
   const handleClearLogo = () => {
@@ -108,6 +123,9 @@ const BrandingManager = () => {
                 className="outline-none py-2.5 px-3 rounded border border-gray-500/40 flex-1"
                 placeholder="Optional: paste logo URL or data"
               />
+              {uploadingLogo && (
+                <span className="text-xs text-gray-500">Uploading...</span>
+              )}
             </div>
             {logoUrl && (
               <button
@@ -226,4 +244,3 @@ const BrandingManager = () => {
 };
 
 export default BrandingManager;
-

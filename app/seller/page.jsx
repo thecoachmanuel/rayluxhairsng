@@ -62,9 +62,35 @@ const AddProduct = () => {
     }
     const numericPrice = Number(price) || 0;
     const numericOfferPrice = Number(offerPrice) || 0;
-    const images = files.filter(Boolean).length
-      ? files.map(() => "/raylux-hairs/raw-straight-bundles-1.jpg")
-      : ["/raylux-hairs/raw-straight-bundles-1.jpg"];
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    let images = ["/raylux-hairs/raw-straight-bundles-1.jpg"];
+    if (files.filter(Boolean).length && cloudName && uploadPreset) {
+      const uploadedUrls = [];
+      for (const file of files) {
+        if (!file) continue;
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+        try {
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+          const data = await response.json();
+          if (response.ok && data.secure_url) {
+            uploadedUrls.push(data.secure_url);
+          }
+        } catch (_error) {
+        }
+      }
+      if (uploadedUrls.length) {
+        images = uploadedUrls;
+      }
+    }
 
     setSubmitting(true);
     try {

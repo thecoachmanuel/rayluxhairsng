@@ -11,6 +11,7 @@ const BannerManager = () => {
   const [ctaLabel, setCtaLabel] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     setTitle(bannerContent.title);
@@ -31,17 +32,31 @@ const BannerManager = () => {
     setSaving(false);
   };
 
-  const handleImageFileChange = (event) => {
+  const handleImageFileChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setImageUrl(reader.result);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !uploadPreset) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    setUploadingImage(true);
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+      if (response.ok && data.secure_url) {
+        setImageUrl(data.secure_url);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (_error) {
+    }
+    setUploadingImage(false);
   };
 
   const handleClearImage = () => {
@@ -133,6 +148,9 @@ const BannerManager = () => {
               className="outline-none py-2.5 px-3 rounded border border-gray-500/40 flex-1"
               placeholder="/raylux-hairs/banner-main.jpg or https://res.cloudinary.com/..."
             />
+            {uploadingImage && (
+              <span className="text-xs text-gray-500">Uploading...</span>
+            )}
           </div>
           {imageUrl && (
             <div className="mt-3 flex items-start gap-4">
