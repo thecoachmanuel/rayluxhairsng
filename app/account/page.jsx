@@ -67,7 +67,7 @@ const AccountPageContent = () => {
     return (
       <>
         <Navbar />
-        <div className="min-h-[60vh] flex items-center justify-center pt-20 md:pt-24">
+        <div className="min-h-[60vh] flex items-center justify-center">
           <p className="text-sm text-gray-600">Loading account...</p>
         </div>
         <Footer />
@@ -79,7 +79,7 @@ const AccountPageContent = () => {
     return (
       <>
         <Navbar />
-        <div className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10 max-w-xl mx-auto">
+        <div className="px-6 md:px-16 lg:px-32 py-10 max-w-xl mx-auto">
           <h1 className="text-2xl font-semibold text-gray-900 mb-4">Account</h1>
           <div className="border border-gray-200 rounded-lg p-6 space-y-4 bg-white">
             <div>
@@ -160,7 +160,7 @@ const AccountPageContent = () => {
   return (
     <>
       <Navbar />
-      <div className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10 max-w-xl mx-auto">
+      <div className="px-6 md:px-16 lg:px-32 py-10 max-w-xl mx-auto">
         <h1 className="text-2xl font-semibold text-gray-900 mb-4">
           {mode === "sign-in" ? "Sign in" : "Create an account"}
         </h1>

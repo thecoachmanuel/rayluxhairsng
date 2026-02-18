@@ -9,7 +9,7 @@ const AboutPage = () => {
   return (
     <>
       <Navbar />
-      <main className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10 flex flex-col gap-12 max-w-6xl mx-auto">
+      <main className="px-6 md:px-16 lg:px-32 py-10 flex flex-col gap-12 max-w-6xl mx-auto">
         <section className="grid md:grid-cols-[1.4fr,1fr] gap-10 items-start">
           <div className="space-y-4">
             <p className="text-xs font-semibold tracking-[0.2em] text-orange-600 uppercase">
@@ -109,3 +109,4 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
+

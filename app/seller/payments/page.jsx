@@ -15,8 +15,6 @@ const PaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [deletingId, setDeletingId] = useState(null);
-  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -107,32 +105,6 @@ const PaymentsPage = () => {
     };
   }, [payments]);
 
-  const handleDeletePayment = async (id) => {
-    if (!supabase || !id) return;
-    const ok = window.confirm("Delete this payment record? This cannot be undone.");
-    if (!ok) return;
-    setDeletingId(id);
-    const { error } = await supabase.from("payments").delete().eq("id", id);
-    if (!error) {
-      setPayments((prev) => prev.filter((payment) => payment.id !== id));
-    }
-    setDeletingId(null);
-  };
-
-  const handleClearHistory = async () => {
-    if (!supabase || payments.length === 0) return;
-    const ok = window.confirm(
-      "Clear all payment history? This will permanently delete all payment records."
-    );
-    if (!ok) return;
-    setClearing(true);
-    const { error } = await supabase.from("payments").delete().gt("id", 0);
-    if (!error) {
-      setPayments([]);
-    }
-    setClearing(false);
-  };
-
   return (
     <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
       <div className="md:p-10 p-4 space-y-5">
@@ -160,7 +132,7 @@ const PaymentsPage = () => {
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex flex-col md:flex-row md:items-center gap-3 justify-between max-w-5xl">
-            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Status</span>
                   <select
@@ -187,7 +159,6 @@ const PaymentsPage = () => {
                   </select>
                 </div>
               </div>
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
               <div className="relative max-w-xs w-full">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                   <Image src={assets.search_icon} alt="search_icon" className="w-3.5 h-3.5" />
@@ -200,15 +171,6 @@ const PaymentsPage = () => {
                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
-              <button
-                type="button"
-                onClick={handleClearHistory}
-                disabled={clearing || payments.length === 0}
-                className="px-3 py-2 rounded-md border text-[11px] whitespace-nowrap bg-white text-red-600 border-red-400 disabled:opacity-60"
-              >
-                {clearing ? "Clearing..." : "Clear payment history"}
-              </button>
-            </div>
             </div>
             <div className="flex flex-wrap gap-3 text-xs text-gray-600">
               <div className="flex items-center gap-2">
@@ -281,14 +243,6 @@ const PaymentsPage = () => {
                         {payment.error_message}
                       </span>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePayment(payment.id)}
-                      disabled={deletingId === payment.id}
-                      className="mt-2 text-[11px] text-red-600 underline disabled:opacity-60"
-                    >
-                      {deletingId === payment.id ? "Deleting..." : "Delete payment"}
-                    </button>
                   </div>
                 </div>
               );
@@ -301,3 +255,4 @@ const PaymentsPage = () => {
 };
 
 export default PaymentsPage;
+
