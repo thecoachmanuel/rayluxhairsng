@@ -41,8 +41,8 @@ const AllProductsContent = () => {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-start px-6 md:px-16 lg:px-32">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between w-full pt-12 gap-6">
+      <div className="flex flex-col items-start px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between w-full gap-6">
           <div className="flex flex-col items-start">
             <p className="text-2xl font-medium">All products</p>
             <div className="w-16 h-0.5 bg-orange-600 rounded-full"></div>

@@ -5,7 +5,7 @@ import { assets } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 
 const BrandingManager = () => {
-  const { branding, updateBranding } = useAppContext();
+  const { branding, updateBranding, membershipSettings, updateMembershipSettings } = useAppContext();
 
   const [logoUrl, setLogoUrl] = useState("");
   const [footerDescription, setFooterDescription] = useState("");
@@ -15,6 +15,8 @@ const BrandingManager = () => {
   const [facebookUrl, setFacebookUrl] = useState("");
   const [twitterUrl, setTwitterUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
+  const [membershipPrice, setMembershipPrice] = useState("");
+  const [membershipBenefits, setMembershipBenefits] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
@@ -27,7 +29,13 @@ const BrandingManager = () => {
     setFacebookUrl(branding.facebookUrl);
     setTwitterUrl(branding.twitterUrl);
     setInstagramUrl(branding.instagramUrl);
-  }, [branding]);
+    setMembershipPrice(
+      membershipSettings.price && typeof membershipSettings.price === "number"
+        ? String(membershipSettings.price)
+        : ""
+    );
+    setMembershipBenefits(membershipSettings.benefits || "");
+  }, [branding, membershipSettings]);
 
   const handleLogoFileChange = async (event) => {
     const file = event.target.files?.[0];
@@ -73,6 +81,10 @@ const BrandingManager = () => {
       facebookUrl,
       twitterUrl,
       instagramUrl,
+    });
+    updateMembershipSettings({
+      price: Number(membershipPrice) || 0,
+      benefits: membershipBenefits,
     });
     setSaving(false);
   };
@@ -175,6 +187,40 @@ const BrandingManager = () => {
               value={footerEmail}
               onChange={(event) => setFooterEmail(event.target.value)}
               className="outline-none py-2.5 px-3 rounded border border-gray-500/40"
+            />
+          </div>
+        </div>
+
+        <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Membership settings
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col gap-1 min-w-[160px]">
+              <label className="text-sm font-medium" htmlFor="membership-price">
+                Membership price (NGN)
+              </label>
+              <input
+                id="membership-price"
+                type="number"
+                value={membershipPrice}
+                onChange={(event) => setMembershipPrice(event.target.value)}
+                className="outline-none py-2.5 px-3 rounded border border-gray-500/40"
+                placeholder="e.g. 10000"
+                min={0}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium" htmlFor="membership-benefits">
+              Membership page description
+            </label>
+            <textarea
+              id="membership-benefits"
+              rows={4}
+              value={membershipBenefits}
+              onChange={(event) => setMembershipBenefits(event.target.value)}
+              className="outline-none py-2.5 px-3 rounded border border-gray-500/40 resize-none"
             />
           </div>
         </div>

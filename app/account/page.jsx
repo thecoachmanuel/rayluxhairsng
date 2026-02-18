@@ -14,7 +14,7 @@ const AccountPageContent = () => {
     signOut,
     router,
     membership,
-    joinMembership,
+    membershipSettings,
   } = useAppContext();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState("sign-in");
@@ -67,7 +67,7 @@ const AccountPageContent = () => {
     return (
       <>
         <Navbar />
-        <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="min-h-[60vh] flex items-center justify-center pt-20 md:pt-24">
           <p className="text-sm text-gray-600">Loading account...</p>
         </div>
         <Footer />
@@ -79,7 +79,7 @@ const AccountPageContent = () => {
     return (
       <>
         <Navbar />
-        <div className="px-6 md:px-16 lg:px-32 py-10 max-w-xl mx-auto">
+        <div className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10 max-w-xl mx-auto">
           <h1 className="text-2xl font-semibold text-gray-900 mb-4">Account</h1>
           <div className="border border-gray-200 rounded-lg p-6 space-y-4 bg-white">
             <div>
@@ -125,25 +125,18 @@ const AccountPageContent = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="button"
-                  onClick={async () => {
+                  onClick={() => {
                     setMembershipMessage("");
-                    const { error } = await joinMembership();
-                    if (error) {
-                      setMembershipMessage(
-                        error.message || "Unable to join membership right now."
-                      );
-                    } else {
-                      setMembershipMessage("You are now a RayLux VIP member.");
-                    }
+                    router.push("/membership?redirect=/account");
                   }}
                   className="px-4 py-2 rounded-md bg-gray-900 hover:bg-black text-white text-sm cursor-pointer"
                 >
-                  Join RayLux VIP
+                  View membership options
                 </button>
                 <p className="text-xs text-gray-600">
-                  Membership is free. You will receive special coupon codes like
-                  <span className="font-semibold"> RAYLUXVIP</span> for huge
-                  discounts during campaigns.
+                  RayLux VIP membership gives you special coupon drops and early
+                  access to new textures. Pricing and benefits are shown on the
+                  membership page.
                 </p>
               </div>
             )}
@@ -160,7 +153,7 @@ const AccountPageContent = () => {
   return (
     <>
       <Navbar />
-      <div className="px-6 md:px-16 lg:px-32 py-10 max-w-xl mx-auto">
+      <div className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10 max-w-xl mx-auto">
         <h1 className="text-2xl font-semibold text-gray-900 mb-4">
           {mode === "sign-in" ? "Sign in" : "Create an account"}
         </h1>

@@ -16,7 +16,7 @@ const WishlistPage = () => {
   return (
     <>
       <Navbar />
-      <main className="px-6 md:px-16 lg:px-32 py-8">
+      <main className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-8">
         <h1 className="text-2xl font-semibold mb-4">Wishlist</h1>
         {wishlistProducts.length === 0 ? (
           <p className="text-gray-500 text-sm">No items in your wishlist yet.</p>
@@ -34,4 +34,3 @@ const WishlistPage = () => {
 };
 
 export default WishlistPage;
-

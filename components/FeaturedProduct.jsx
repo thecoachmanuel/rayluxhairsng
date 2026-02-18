@@ -4,7 +4,7 @@ import { assets } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 
 const FeaturedProduct = () => {
-  const { products, featuredProductIds } = useAppContext();
+  const { products, featuredProductIds, router } = useAppContext();
 
   const featuredProducts = featuredProductIds
     .map((id) => products.find((product) => product._id === id))
@@ -45,21 +45,30 @@ const FeaturedProduct = () => {
                 width={800}
                 height={800}
               />
-            <div className="group-hover:-translate-y-4 transition duration-300 absolute bottom-8 left-8 text-white space-y-2">
-              <p className="font-medium text-xl lg:text-2xl">{product.name}</p>
-              <p className="text-sm lg:text-base leading-5 max-w-60">
-                {product.description}
-              </p>
-              <button className="flex items-center gap-1.5 bg-orange-600 px-4 py-2 rounded">
-                Buy now
-                <Image
-                  className="h-3 w-3"
-                  src={assets.redirect_icon}
-                  alt="Redirect Icon"
-                />
-              </button>
+              <div className="group-hover:-translate-y-4 transition duration-300 absolute bottom-8 left-8 text-white space-y-2">
+                <p className="font-medium text-xl lg:text-2xl">{product.name}</p>
+                <p className="text-sm lg:text-base leading-5 max-w-60">
+                  {product.description}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    router.push(`/product/${product._id}`);
+                    if (typeof window !== "undefined" && window.scrollTo) {
+                      window.scrollTo(0, 0);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 bg-orange-600 px-4 py-2 rounded"
+                >
+                  Buy now
+                  <Image
+                    className="h-3 w-3"
+                    src={assets.redirect_icon}
+                    alt="Redirect Icon"
+                  />
+                </button>
+              </div>
             </div>
-          </div>
           );
         })}
       </div>

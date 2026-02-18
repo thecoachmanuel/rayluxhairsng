@@ -59,7 +59,7 @@ const ContactPage = () => {
   return (
     <>
       <Navbar />
-      <main className="px-6 md:px-16 lg:px-32 py-10 max-w-6xl mx-auto flex flex-col gap-10">
+      <main className="px-6 md:px-16 lg:px-32 pt-20 md:pt-24 pb-10 max-w-6xl mx-auto flex flex-col gap-10">
         <section className="max-w-2xl space-y-3">
           <p className="text-xs font-semibold tracking-[0.2em] text-orange-600 uppercase">
             Contact
@@ -173,4 +173,3 @@ const ContactPage = () => {
 };
 
 export default ContactPage;
-
