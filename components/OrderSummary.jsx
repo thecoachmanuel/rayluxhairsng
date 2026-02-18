@@ -217,6 +217,23 @@ const OrderSummary = () => {
 	const tax = Math.floor(totalBeforeTax * 0.02);
 	const total = totalBeforeTax + tax;
 
+	const logPaymentEvent = async (params) => {
+		if (!supabase || !authUser) {
+			return;
+		}
+		const payload = {
+			reference: params.reference,
+			user_id: authUser.id,
+			email: authUser.email || null,
+			amount: total,
+			currency: "NGN",
+			status: params.status,
+			gateway: "paystack",
+			error_message: params.errorMessage || null,
+		};
+		await supabase.from("payments").upsert([payload], { onConflict: "reference" });
+	};
+
 	const handlePayWithPaystack = () => {
 		if (!selectedAddress) {
 			setCouponMessage("Select a delivery address before paying.");
@@ -238,22 +255,38 @@ const OrderSummary = () => {
 		setIsPaying(true);
 		const amountInKobo = Math.round(total * 100);
 		const ref = `RAYLUX_${Date.now()}`;
+		logPaymentEvent({ reference: ref, status: "initialized" });
+		let completed = false;
 		const paystack = window.PaystackPop.setup({
 			key: publicKey,
 			email: authUser && authUser.email ? authUser.email : "customer@example.com",
 			amount: amountInKobo,
 			ref,
 			callback: function (response) {
-				createOrder(response && response.reference ? response.reference : ref)
-					.then(() => {
-						setIsPaying(false);
-						router.push("/order-placed");
-					})
-					.catch(() => {
-						setIsPaying(false);
-					});
+				const referenceValue = response && response.reference ? response.reference : ref;
+				const statusValue = response && response.status ? response.status : "success";
+				if (statusValue === "success") {
+					completed = true;
+				}
+				logPaymentEvent({ reference: referenceValue, status: statusValue });
+				if (statusValue === "success") {
+					createOrder(referenceValue)
+						.then(() => {
+							setIsPaying(false);
+							router.push("/order-placed");
+						})
+						.catch(() => {
+							setIsPaying(false);
+						});
+				} else {
+					setCouponMessage("Payment was not successful. Please try again.");
+					setIsPaying(false);
+				}
 			},
 			onClose: function () {
+				if (!completed) {
+					logPaymentEvent({ reference: ref, status: "closed" });
+				}
 				setIsPaying(false);
 			},
 		});
