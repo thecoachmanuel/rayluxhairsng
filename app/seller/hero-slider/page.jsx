@@ -16,6 +16,8 @@ const HeroSliderManager = () => {
   const [uploadingSlideId, setUploadingSlideId] = useState(null);
   const [primaryProductId, setPrimaryProductId] = useState("");
   const [secondaryProductId, setSecondaryProductId] = useState("");
+  const [savingSlides, setSavingSlides] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   const productOptions = Array.isArray(products)
     ? products.map((product) => ({
@@ -50,6 +52,14 @@ const HeroSliderManager = () => {
       }
     } catch (_error) {}
     return null;
+  };
+
+  const handleSaveSlides = () => {
+    setSaveMessage("");
+    setSavingSlides(true);
+    updateHeroSlides([...heroSlides]);
+    setSavingSlides(false);
+    setSaveMessage("Hero slides saved.");
   };
 
   const handleAddSlide = async (event) => {
@@ -126,6 +136,19 @@ const HeroSliderManager = () => {
 
         <div className="space-y-4">
           <h3 className="text-base font-medium">Existing slides</h3>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSaveSlides}
+              disabled={savingSlides || heroSlides.length === 0}
+              className="px-4 py-2 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs cursor-pointer disabled:opacity-60"
+            >
+              {savingSlides ? "Saving..." : "Save hero slides"}
+            </button>
+            {saveMessage && (
+              <p className="text-[11px] text-green-600">{saveMessage}</p>
+            )}
+          </div>
           {heroSlides.length === 0 && (
             <p className="text-sm text-gray-500">
               No slides found. Add a new slide below.

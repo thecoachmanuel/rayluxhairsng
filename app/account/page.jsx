@@ -81,6 +81,7 @@ const AccountPageContent = () => {
         setSuccess(
           "Account created. Check your email for confirmation if required."
         );
+        router.push(redirectPath);
       }
     }
     setSubmitting(false);
