@@ -96,12 +96,32 @@ const PaymentsPage = () => {
       }
       return sum;
     }, 0);
+
+    const membershipPayments = payments.filter((p) => {
+      const ref = p.reference || "";
+      return ref.startsWith("RAYLUX_MEM_");
+    });
+    const membershipCount = membershipPayments.length;
+    const membershipSuccessCount = membershipPayments.filter(
+      (p) => p.status === "success"
+    ).length;
+    const membershipSuccessfulAmount = membershipPayments.reduce((sum, p) => {
+      if (p.status === "success") {
+        const amount = Number(p.amount) || 0;
+        return sum + amount;
+      }
+      return sum;
+    }, 0);
+
     return {
       totalCount,
       successCount,
       failedCount,
       totalAmount,
       successfulAmount,
+      membershipCount,
+      membershipSuccessCount,
+      membershipSuccessfulAmount,
     };
   }, [payments]);
 
@@ -127,6 +147,22 @@ const PaymentsPage = () => {
               <span className="text-xs text-gray-500">Successful volume</span>
               <span className="text-sm font-semibold text-gray-900">
                 {formatCurrency(summary.successfulAmount)}
+              </span>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3 max-w-5xl">
+            <div className="border border-gray-200 rounded-md p-3 bg-white flex flex-col gap-1">
+              <span className="text-xs text-gray-500">Membership payments</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {summary.membershipCount}
+                {summary.membershipCount > 0 &&
+                  ` (${summary.membershipSuccessCount} successful)`}
+              </span>
+            </div>
+            <div className="border border-gray-200 rounded-md p-3 bg-white flex flex-col gap-1">
+              <span className="text-xs text-gray-500">Membership revenue</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {formatCurrency(summary.membershipSuccessfulAmount)}
               </span>
             </div>
           </div>
@@ -204,6 +240,7 @@ const PaymentsPage = () => {
           ) : (
             filteredPayments.map((payment) => {
               const amount = Number(payment.amount) || 0;
+              const isMembership = (payment.reference || "").startsWith("RAYLUX_MEM_");
               return (
                 <div
                   key={payment.id || payment.reference}
@@ -217,6 +254,11 @@ const PaymentsPage = () => {
                       <span className="font-semibold text-sm">{formatCurrency(amount)}</span>
                       <span className="text-gray-500">{payment.email || "Unknown email"}</span>
                       <span className="text-[11px] text-gray-400">Ref: {payment.reference}</span>
+                      {isMembership && (
+                        <span className="inline-flex mt-0.5 px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-medium w-fit">
+                          Membership
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1 text-xs min-w-[160px] items-end">
@@ -255,4 +297,3 @@ const PaymentsPage = () => {
 };
 
 export default PaymentsPage;
-

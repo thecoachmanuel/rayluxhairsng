@@ -1,9 +1,11 @@
 "use client";
 import { Suspense, useState } from "react";
+import Script from "next/script";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAppContext } from "@/context/AppContext";
+import { supabase } from "@/supabaseClient";
 
 const AccountPageContent = () => {
   const {
@@ -15,6 +17,8 @@ const AccountPageContent = () => {
     router,
     membership,
     joinMembership,
+    membershipSettings,
+    formatCurrency,
   } = useAppContext();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState("sign-in");
@@ -24,6 +28,31 @@ const AccountPageContent = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [membershipMessage, setMembershipMessage] = useState("");
+  const [isPaying, setIsPaying] = useState(false);
+
+  const logMembershipPaymentEvent = async (params) => {
+    const { reference, status, errorMessage } = params;
+    if (!authUser) {
+      return;
+    }
+    const amount = membershipSettings && typeof membershipSettings.price === "number"
+      ? membershipSettings.price
+      : 0;
+    if (!amount || !supabase) {
+      return;
+    }
+    const payload = {
+      reference,
+      user_id: authUser.id,
+      email: authUser.email || null,
+      amount,
+      currency: "NGN",
+      status,
+      gateway: "paystack",
+      error_message: errorMessage || null,
+    };
+    await supabase.from("payments").upsert([payload], { onConflict: "reference" });
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -63,6 +92,68 @@ const AccountPageContent = () => {
     await signOut();
   };
 
+  const handleStartMembershipPayment = () => {
+    setMembershipMessage("");
+    if (!authUser) {
+      setMembershipMessage("Sign in to join RayLux VIP.");
+      return;
+    }
+    if (!membershipSettings || !membershipSettings.price || membershipSettings.price <= 0) {
+      setMembershipMessage("Membership configuration is missing. Please try again later.");
+      return;
+    }
+    if (typeof window === "undefined" || !window.PaystackPop) {
+      setMembershipMessage("Payment system is still loading. Please try again.");
+      return;
+    }
+    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    if (!publicKey) {
+      setMembershipMessage("Payment configuration is missing. Contact support.");
+      return;
+    }
+
+    const amountInKobo = Math.round(membershipSettings.price * 100);
+    if (amountInKobo <= 0) {
+      setMembershipMessage("Membership price must be greater than zero.");
+      return;
+    }
+
+    setIsPaying(true);
+    const ref = `RAYLUX_MEM_${Date.now()}`;
+
+    logMembershipPaymentEvent({ reference: ref, status: "initialized" });
+
+    const paystack = window.PaystackPop.setup({
+      key: publicKey,
+      email: authUser && authUser.email ? authUser.email : "customer@example.com",
+      amount: amountInKobo,
+      ref,
+      callback: async function (response) {
+        const referenceValue = response && response.reference ? response.reference : ref;
+        const statusValue = response && response.status ? response.status : "success";
+        await logMembershipPaymentEvent({ reference: referenceValue, status: statusValue });
+        if (statusValue === "success") {
+          const { error } = await joinMembership();
+          if (error) {
+            setMembershipMessage(
+              error.message || "Payment succeeded, but membership could not be activated."
+            );
+          } else {
+            setMembershipMessage("You are now a RayLux VIP member.");
+          }
+        } else {
+          setMembershipMessage("Payment was not successful. Please try again.");
+        }
+        setIsPaying(false);
+      },
+      onClose: function () {
+        logMembershipPaymentEvent({ reference: ref, status: "closed" });
+        setIsPaying(false);
+      },
+    });
+    paystack.openIframe();
+  };
+
   if (authLoading) {
     return (
       <>
@@ -78,6 +169,7 @@ const AccountPageContent = () => {
   if (authUser) {
     return (
       <>
+        <Script src="https://js.paystack.co/v1/inline.js" strategy="afterInteractive" />
         <Navbar />
         <div className="px-6 md:px-16 lg:px-32 py-10 max-w-xl mx-auto">
           <h1 className="text-2xl font-semibold text-gray-900 mb-4">Account</h1>
@@ -106,12 +198,30 @@ const AccountPageContent = () => {
           </div>
           <div className="mt-6 border border-orange-100 rounded-lg p-6 bg-orange-50/60 space-y-3">
             <h2 className="text-base font-semibold text-gray-900">
-              RayLux VIP membership
+              {membershipSettings?.title || "RayLux VIP membership"}
             </h2>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Join RayLux VIP to unlock special coupon drops, early access to new
-              textures, and surprise gifts for loyal customers.
+              {membershipSettings?.subtitle ||
+                "Join RayLux VIP to unlock special coupon drops, early access to new textures, and surprise gifts for loyal customers."}
             </p>
+            {membershipSettings?.description && (
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {membershipSettings.description}
+              </p>
+            )}
+            {Array.isArray(membershipSettings?.benefits) &&
+              membershipSettings.benefits.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-xs text-gray-700 space-y-1">
+                  {membershipSettings.benefits.map((benefit, index) => (
+                    <li key={index}>{benefit}</li>
+                  ))}
+                </ul>
+              )}
+            {membershipSettings && (
+              <p className="text-xs font-medium text-gray-900 mt-2">
+                One-time membership fee: {formatCurrency(membershipSettings.price || 0)}
+              </p>
+            )}
             {membership && membership.is_active ? (
               <div className="space-y-1">
                 <p className="text-sm font-medium text-green-700">
@@ -125,25 +235,15 @@ const AccountPageContent = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="button"
-                  onClick={async () => {
-                    setMembershipMessage("");
-                    const { error } = await joinMembership();
-                    if (error) {
-                      setMembershipMessage(
-                        error.message || "Unable to join membership right now."
-                      );
-                    } else {
-                      setMembershipMessage("You are now a RayLux VIP member.");
-                    }
-                  }}
+                  onClick={handleStartMembershipPayment}
                   className="px-4 py-2 rounded-md bg-gray-900 hover:bg-black text-white text-sm cursor-pointer"
                 >
-                  Join RayLux VIP
+                  {isPaying ? "Processing payment..." : "Join RayLux VIP"}
                 </button>
                 <p className="text-xs text-gray-600">
-                  Membership is free. You will receive special coupon codes like
-                  <span className="font-semibold"> RAYLUXVIP</span> for huge
-                  discounts during campaigns.
+                  Your card will be charged a one-time membership fee. You will
+                  receive exclusive coupon codes and early access to new drops as a
+                  VIP member.
                 </p>
               </div>
             )}

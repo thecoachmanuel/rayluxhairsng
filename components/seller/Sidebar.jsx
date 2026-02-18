@@ -30,6 +30,7 @@ const SideBar = () => {
         { name: 'Newsletter', path: '/seller/newsletter', icon: MailIcon },
         { name: 'Coupons', path: '/seller/coupons', icon: TicketIcon },
         { name: 'Shipping & Fees', path: '/seller/shipping', icon: TruckIcon },
+        { name: 'VIP Membership', path: '/seller/membership', icon: UsersIcon },
         { name: 'Customers', path: '/seller/customers', icon: UsersIcon },
         { name: 'Analytics', path: '/seller/analytics', icon: ChartBarIcon },
         { name: 'Payments', path: '/seller/payments', icon: CreditCardIcon },

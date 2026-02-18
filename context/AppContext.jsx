@@ -60,6 +60,19 @@ export const AppContextProvider = (props) => {
   });
   const [coupons, setCoupons] = useState([]);
   const [membership, setMembership] = useState(null);
+  const [membershipSettings, setMembershipSettings] = useState({
+    title: "RayLux VIP membership",
+    subtitle: "Unlock exclusive discounts, early access, and VIP treatment on every purchase.",
+    description:
+      "RayLux VIP is for shoppers who want consistent savings, first access to new textures, and priority support whenever they shop.",
+    price: 10000,
+    currency: "NGN",
+    benefits: [
+      "Exclusive discount codes during major campaigns",
+      "Early access to new product drops and restocks",
+      "Priority customer support via WhatsApp and email",
+    ],
+  });
 	const [adminVerified, setAdminVerified] = useState(false);
   const [bannerContent, setBannerContent] = useState({
     title: "Level Up Your Look With RayLux Hairs",
@@ -430,6 +443,120 @@ export const AppContextProvider = (props) => {
       localStorage.setItem("raylux_branding", JSON.stringify(nextBranding));
     } catch (error) {
     }
+  };
+
+  const loadMembershipSettings = () => {
+    if (supabase) {
+      supabase
+        .from("membership_settings")
+        .select("*")
+        .limit(1)
+        .then((result) => {
+          if (!result.error && Array.isArray(result.data) && result.data[0]) {
+            const row = result.data[0];
+            setMembershipSettings((prev) => ({
+              title:
+                typeof row.title === "string" && row.title.trim().length
+                  ? row.title
+                  : prev.title,
+              subtitle:
+                typeof row.subtitle === "string" && row.subtitle.trim().length
+                  ? row.subtitle
+                  : prev.subtitle,
+              description:
+                typeof row.description === "string" && row.description.trim().length
+                  ? row.description
+                  : prev.description,
+              price:
+                typeof row.price === "number" && !Number.isNaN(row.price)
+                  ? row.price
+                  : prev.price,
+              currency:
+                typeof row.currency === "string" && row.currency.trim().length
+                  ? row.currency
+                  : prev.currency,
+              benefits: Array.isArray(row.benefits)
+                ? row.benefits
+                : Array.isArray(prev.benefits)
+                ? prev.benefits
+                : [],
+            }));
+            return;
+          }
+        });
+      return;
+    }
+    try {
+      const stored = localStorage.getItem("raylux_membership_settings");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === "object") {
+          setMembershipSettings((prev) => ({
+            title:
+              typeof parsed.title === "string" && parsed.title.trim().length
+                ? parsed.title
+                : prev.title,
+            subtitle:
+              typeof parsed.subtitle === "string" && parsed.subtitle.trim().length
+                ? parsed.subtitle
+                : prev.subtitle,
+            description:
+              typeof parsed.description === "string" &&
+              parsed.description.trim().length
+                ? parsed.description
+                : prev.description,
+            price:
+              typeof parsed.price === "number" && !Number.isNaN(parsed.price)
+                ? parsed.price
+                : prev.price,
+            currency:
+              typeof parsed.currency === "string" &&
+              parsed.currency.trim().length
+                ? parsed.currency
+                : prev.currency,
+            benefits: Array.isArray(parsed.benefits)
+              ? parsed.benefits
+              : Array.isArray(prev.benefits)
+              ? prev.benefits
+              : [],
+          }));
+        }
+      }
+    } catch (error) {}
+  };
+
+  const updateMembershipSettings = (updates) => {
+    setMembershipSettings((prev) => {
+      const next = {
+        ...prev,
+        ...updates,
+      };
+      if (typeof next.price !== "number" || Number.isNaN(next.price)) {
+        next.price = 0;
+      }
+      if (!Array.isArray(next.benefits)) {
+        next.benefits = Array.isArray(prev.benefits) ? prev.benefits : [];
+      }
+      if (supabase) {
+        const payload = {
+          id: 1,
+          title: next.title || "",
+          subtitle: next.subtitle || "",
+          description: next.description || "",
+          price: next.price || 0,
+          currency: next.currency || "NGN",
+          benefits: Array.isArray(next.benefits) ? next.benefits : [],
+        };
+        supabase.from("membership_settings").upsert([payload]);
+      }
+      try {
+        localStorage.setItem(
+          "raylux_membership_settings",
+          JSON.stringify(next)
+        );
+      } catch (error) {}
+      return next;
+    });
   };
 
   const loadNewsletterEmails = () => {
@@ -958,6 +1085,7 @@ export const AppContextProvider = (props) => {
     loadShippingSettings();
     loadCoupons();
     loadWishlist();
+    loadMembershipSettings();
     if (!supabase) {
       setAuthLoading(false);
       return;
@@ -1028,6 +1156,8 @@ export const AppContextProvider = (props) => {
     signOut,
     products,
     fetchProductData,
+    updateProduct,
+    deleteProduct,
     cartItems,
     setCartItems,
     addToCart,
@@ -1053,6 +1183,8 @@ export const AppContextProvider = (props) => {
     updateCoupon,
     deleteCoupon,
     membership,
+    membershipSettings,
+    updateMembershipSettings,
     joinMembership,
     wishlistIds,
     toggleWishlistItem,
